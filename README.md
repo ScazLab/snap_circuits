@@ -1,2 +1,2 @@
-# snapCircuits_perception
+# snap_circuits_perception
 This repository provides a package for the perception part of the snapCircuits experiments.
