@@ -1,5 +1,9 @@
+# Copyright: (C) 2016 Social Robotics Lab - Yale University
+# Authors: Alessandro Roncone
+# CopyPolicy: Released under the terms of the GNU GPL v3.0.
+
 cmake_minimum_required(VERSION 2.8.3)
-project(snap_circuits_perception)
+project(snap_circuits)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -8,7 +12,6 @@ find_package(catkin REQUIRED)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
-
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -97,7 +100,7 @@ find_package(catkin REQUIRED)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES snap_circuits_perception
+#  LIBRARIES snap_circuits
 #  CATKIN_DEPENDS other_catkin_pkg
 #  DEPENDS system_lib
 )
@@ -110,25 +113,18 @@ catkin_package(
 ## Your package locations should be listed before other locations
 # include_directories(include)
 
-## Declare a C++ library
-# add_library(snap_circuits_perception
-#   src/${PROJECT_NAME}/snap_circuits_perception.cpp
-# )
-
-## Add cmake target dependencies of the library
-## as an example, code may need to be generated before libraries
-## either from message generation or dynamic reconfigure
-# add_dependencies(snap_circuits_perception ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+## Add libraries
+add_subdirectory(lib)
 
 ## Declare a C++ executable
-# add_executable(snap_circuits_perception_node src/snap_circuits_perception_node.cpp)
+# add_executable(snap_circuits_node src/snap_circuits_node.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# add_dependencies(snap_circuits_perception_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(snap_circuits_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(snap_circuits_perception_node
+# target_link_libraries(snap_circuits_node
 #   ${catkin_LIBRARIES}
 # )
 
@@ -147,7 +143,7 @@ catkin_package(
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS snap_circuits_perception snap_circuits_perception_node
+# install(TARGETS snap_circuits snap_circuits_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -172,7 +168,7 @@ catkin_package(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_snap_circuits_perception.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_snap_circuits.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
