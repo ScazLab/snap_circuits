@@ -1,4 +1,4 @@
-# snap_circuits_perception
+# Snap Circuits!
 This repository provides a package for the perception part of the snapCircuits experiments.
 
 We should be able to detect this:
