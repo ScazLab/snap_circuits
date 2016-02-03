@@ -10,3 +10,7 @@ The manual is available at this link: http://www.elenco.com/admin_data/pdffiles/
 This is the list of parts in the board we are going to use:
 
 ![SnapCircuits list of parts](https://cloud.githubusercontent.com/assets/4378663/12762244/517f86fe-c9bc-11e5-874d-563c15f531be.png)
+
+## Credits
+
+This repository uses `nanosvg`, a simple stupid single-header-file SVG parser. It has been cloned from here: https://github.com/memononen/nanosvg
