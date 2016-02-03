@@ -16,7 +16,38 @@
 #ifndef __SNAPCIRCUITS_PART_H__
 #define __SNAPCIRCUITS_PART_H__
 
+#include <string>
+#include "snapCircuits/utils.h"
+
 namespace snapCircuits {
+
+class snapCircuitsPart
+{
+private:
+    std::string                label;
+    std::string                 name;
+
+    snapCircuits::Location  location;
+
+    struct NSVGimage*          image;
+
+public:
+    snapCircuitsPart();
+    snapCircuitsPart(std::string _label);
+    ~snapCircuitsPart();
+    
+};
+
+// class snapWire: public snapCircuitsPart
+// {
+// private:
+//     int length;     // this is the additional parameter needed for 
+
+// public:
+//     snapWire();
+//     ~snapWire();
+    
+// };
 
 };
 

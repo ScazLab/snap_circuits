@@ -16,7 +16,26 @@
 #ifndef __SNAPCIRCUITS_BOARD_H__
 #define __SNAPCIRCUITS_BOARD_H__
 
+#include "snapCircuits/utils.h"
+#include "snapCircuits/snapCircuitsPart.h"
+
+#include <vector>
+
 namespace snapCircuits {
+
+class snapCircuitsBoard
+{
+private:
+    int MAX_ROWS;
+    int MAX_COLS;
+
+    std::vector<snapCircuitsPart> parts;
+
+public:
+    snapCircuitsBoard();
+    ~snapCircuitsBoard();
+    
+};
 
 };
 
