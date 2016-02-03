@@ -29,7 +29,7 @@ private:
 
     snapCircuits::Location  location;
 
-    struct NSVGimage*          image;
+    NSVGimage*                 image;
 
 public:
     snapCircuitsPart();

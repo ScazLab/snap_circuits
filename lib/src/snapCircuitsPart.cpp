@@ -1,4 +1,3 @@
-#include "snapCircuits/utils.h"
 #include "snapCircuits/snapCircuitsPart.h"
 
 using namespace std;

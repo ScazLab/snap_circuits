@@ -19,10 +19,9 @@
 #include <string>
 #include <stdio.h>
 
-#define NANOSVG_ALL_COLOR_KEYWORDS  // Include full list of color keywords.
-#define NANOSVG_IMPLEMENTATION      // Expands implementation
-#include "snapCircuits/nanosvg.h"
-#include "snapCircuits/nanosvgrast.h"
+// #define NANOSVG_ALL_COLOR_KEYWORDS  // Include full list of color keywords
+// #define NANOSVG_IMPLEMENTATION      // Expands implementation
+#include "nanosvg/nanosvg.h"
 
 namespace snapCircuits {
 
