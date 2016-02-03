@@ -33,7 +33,8 @@ typedef struct NSVGrasterizer NSVGrasterizer;
 
 /* Example Usage:
 	// Load SVG
-	struct SNVGImage* image = nsvgParseFromFile("test.svg.");
+	NSVGimage* image;
+	image = nsvgParseFromFile("test.svg", "px", 96);
 
 	// Create rasterizer (can be used to render multiple images).
 	struct NSVGrasterizer* rast = nsvgCreateRasterizer();
@@ -72,6 +73,7 @@ void nsvgDeleteRasterizer(NSVGrasterizer*);
 #ifdef NANOSVGRAST_IMPLEMENTATION
 
 #include <math.h>
+#include <stdio.h>
 
 #define NSVG__SUBSAMPLES	5
 #define NSVG__FIXSHIFT		10
@@ -1203,7 +1205,7 @@ static void nsvg__unpremultiplyAlpha(unsigned char* image, int w, int h, int str
 	for (y = 0; y < h; y++) {
 		unsigned char *row = &image[y*stride];
 		for (x = 0; x < w; x++) {
-			int r = row[0], g = row[1], b = row[2], a = row[3];
+			int b = row[0], g = row[1], r = row[2], a = row[3];
 			if (a != 0) {
 				row[0] = (unsigned char)(r*255/a);
 				row[1] = (unsigned char)(g*255/a);
@@ -1220,33 +1222,33 @@ static void nsvg__unpremultiplyAlpha(unsigned char* image, int w, int h, int str
 			int r = 0, g = 0, b = 0, a = row[3], n = 0;
 			if (a == 0) {
 				if (x-1 > 0 && row[-1] != 0) {
-					r += row[-4];
+					b += row[-4];
 					g += row[-3];
-					b += row[-2];
+					r += row[-2];
 					n++;
 				}
 				if (x+1 < w && row[7] != 0) {
-					r += row[4];
+					b += row[4];
 					g += row[5];
-					b += row[6];
+					r += row[6];
 					n++;
 				}
 				if (y-1 > 0 && row[-stride+3] != 0) {
-					r += row[-stride];
+					b += row[-stride];
 					g += row[-stride+1];
-					b += row[-stride+2];
+					r += row[-stride+2];
 					n++;
 				}
 				if (y+1 < h && row[stride+3] != 0) {
-					r += row[stride];
+					b += row[stride];
 					g += row[stride+1];
-					b += row[stride+2];
+					r += row[stride+2];
 					n++;
 				}
 				if (n > 0) {
-					row[0] = (unsigned char)(r/n);
+					row[0] = (unsigned char)(b/n);
 					row[1] = (unsigned char)(g/n);
-					row[2] = (unsigned char)(b/n);
+					row[2] = (unsigned char)(r/n);
 				}
 			}
 			row += 4;
