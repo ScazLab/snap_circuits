@@ -15,6 +15,7 @@ set(folder_source src/utils.cpp
 ## Specify the header files
 set(folder_header include/snapCircuits/utils.h
                   include/snapCircuits/nanosvg.h
+                  include/snapCircuits/nanosvgrast.h
                   include/snapCircuits/snapCircuitsPart.h
                   include/snapCircuits/snapCircuitsBoard.h)
 
