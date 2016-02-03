@@ -127,7 +127,7 @@ add_executable(snap_circuits_visualizer snap_circuits_visualization/visualizer.c
 # add_dependencies(snap_circuits_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(snap_circuits_visualizer ${catkin_LIBRARIES} )
+target_link_libraries(snap_circuits_visualizer ${catkin_LIBRARIES} nanosvg snapCircuits )
 
 #############
 ## Install ##
