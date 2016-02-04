@@ -27,7 +27,7 @@ private:
     std::string                label;
     std::string                 name;
 
-    snapCircuits::Location  location;
+    snapCircuits::snapLocation  location;
 
     NSVGimage*                 image;
 

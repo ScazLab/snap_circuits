@@ -25,15 +25,45 @@
 #include "nanosvg/nanosvg.h"
 #include "nanosvg/nanosvgrast.h"
 
+#define X_MAX 10
+#define Y_MAX  8
+
 namespace snapCircuits {
 
-struct Location {
+class snapLocation {
+
+private:
     int x;  // position on the x axis
     int y;  // position on the y axis
-    int o;  // orientation (either 0, 90, 180, 270, 0)
+    int o;  // orientation (either 0, 90, 180, 270)
 
-    const int XMAX;
-    const int YMAX;
+    int x_max; // max value for the x axis position (i.e. max number of cols)
+    int y_max; // max value for the y axis position (i.e. max number of rows)
+
+public:
+    // CONSTRUCTORS
+    snapLocation();
+    snapLocation(int _x_max, int _y_max);
+    snapLocation(int _x, int _y, int _o);
+    snapLocation(int _x, int _y, int _o, int _x_max, int _y_max);
+
+    // SETTERS
+    bool setX(const int &_x)        {         x=_x; return true; }; 
+    bool setY(const int &_y)        {         y=_y; return true; }; 
+    bool setO(const int &_o)        {         o=_o; return true; }; 
+    bool setXMax(const int &_x_max) { x_max=_x_max; return true; }; 
+    bool setYMax(const int &_y_max) { y_max=_y_max; return true; }; 
+
+    bool setXYO(const int &_x, const int &_y, const int &_o);
+    bool setXYMax(const int &_x_max, const int &_y_max);
+
+    // GETTERS
+    int getX()    {     return x; }; 
+    int getY()    {     return y; }; 
+    int getO()    {     return o; }; 
+    int getXMax() { return x_max; }; 
+    int getYMax() { return y_max; };
+
 };
 
 /**
