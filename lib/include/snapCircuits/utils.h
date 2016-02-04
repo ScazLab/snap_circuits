@@ -30,9 +30,11 @@ namespace snapCircuits {
 struct Location {
     int x;  // position on the x axis
     int y;  // position on the y axis
-    int o;  // orientation (either 90, 180, 270, 360)
-};
+    int o;  // orientation (either 0, 90, 180, 270, 0)
 
+    const int XMAX;
+    const int YMAX;
+};
 
 /**
  * This method retrieves the name and label description of the part from its ID.
