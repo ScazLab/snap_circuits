@@ -1,8 +1,12 @@
 #include "snapCircuits/utils.h"
 
-using namespace          std;
-using namespace           cv;
+using namespace std;
+using namespace cv;
 using namespace snapCircuits;
+
+/*************************************************************************************/
+/*                                SNAP LOCATION                                      */
+/*************************************************************************************/
 
 snapLocation::snapLocation()
 {
@@ -37,6 +41,8 @@ bool snapLocation::setXYMax(const int &_x_max, const int &_y_max)
 {
     return setXMax(_x_max) && setYMax(_y_max);
 }
+
+/*************************************************************************************/
 
 bool snapCircuits::getNameLabelfromID(const string &_id, string &name, string &label)
 {

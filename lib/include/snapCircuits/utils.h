@@ -66,6 +66,8 @@ public:
 
 };
 
+/*************************************************************************************/
+
 /**
  * This method retrieves the name and label description of the part from its ID.
  * Originally, it was elegantly implemented as a std::map<std::string, std::tuple>, but
