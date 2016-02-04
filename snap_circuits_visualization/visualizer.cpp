@@ -11,6 +11,7 @@
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp> 
 
 using namespace  cv;
 using namespace std;
@@ -41,7 +42,7 @@ int main(int argc, char const *argv[])
     Mat mat = Mat(h, w, CV_8UC4);
     mat = cv::Scalar(255,255,255);
     mat.data = img;
-    // cvtColor(img, img, CV_RGBA2BGRA);
+    cv::cvtColor(mat, mat, CV_RGBA2BGRA);
 
     printf("Created cv Mat. Mat size %i %i\n",mat.rows,mat.cols);
 
@@ -62,6 +63,8 @@ int main(int argc, char const *argv[])
 
     nsvgDeleteRasterizer(rast);
     nsvgDelete(image);
+
+    imwrite("/tmp/out.png", mat);
 
     return 0;
 }
