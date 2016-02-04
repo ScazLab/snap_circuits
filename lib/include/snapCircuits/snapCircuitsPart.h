@@ -38,17 +38,6 @@ public:
     
 };
 
-// class snapWire: public snapCircuitsPart
-// {
-// private:
-//     int length;     // this is the additional parameter needed for 
-
-// public:
-//     snapWire();
-//     ~snapWire();
-    
-// };
-
 };
 
 #endif

@@ -19,9 +19,11 @@
 #include <string>
 #include <stdio.h>
 
-// #define NANOSVG_ALL_COLOR_KEYWORDS  // Include full list of color keywords
-// #define NANOSVG_IMPLEMENTATION      // Expands implementation
+#include <opencv2/core/core.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+
 #include "nanosvg/nanosvg.h"
+#include "nanosvg/nanosvgrast.h"
 
 namespace snapCircuits {
 
@@ -42,6 +44,16 @@ struct Location {
  * @return true/false if success/failure
  */
 bool getNameLabelfromID(const std::string &_id, std::string &name, std::string &label);
+
+/**
+ * Converts a NSVGimage to cv::Mat
+ * @param  _im    the input image
+ * @param  _w     the desired width of the converted image
+ * @param  _h     the desired height of the converted image
+ * @param  result the resulting cv::Mat
+ * @return        true/false if success/failure
+ */
+bool NSVGtocvMat(NSVGimage* _im, size_t _w, size_t _h, cv::Mat &result);
 
 };
 
