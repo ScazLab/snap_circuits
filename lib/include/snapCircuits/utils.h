@@ -89,6 +89,8 @@ bool getNameLabelfromID(const std::string &_id, std::string &name, std::string &
  */
 bool NSVGtocvMat(NSVGimage* _im, size_t _w, size_t _h, cv::Mat &result);
 
+void printNSVGpath(NSVGpath _p);
+
 };
 
 #endif

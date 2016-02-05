@@ -3,8 +3,9 @@
 #define NANOSVG_IMPLEMENTATION      // Expands implementation
 #define NANOSVGRAST_IMPLEMENTATION  // Expands implementation
 
-#include "nanosvg/nanosvg.h"
+// #include "nanosvg/nanosvg.h"
 #include "nanosvg/nanosvgrast.h"
+#include "nanosvg/nanosvgutils.h"
 
 #include <vector>
 
@@ -18,7 +19,17 @@ int main(int argc, char const *argv[])
 {
     // Load SVG
     NSVGimage* image;
-    image = nsvgParseFromFile("/home/alecive/Desktop/Test!/FlatWoken/power_B.svg", "px", 96);
+    image = nsvgParseFromFile("/home/alecive/code/catkin_my_ws/src/snap_circuits/lib/resources/WC.svg", "px", 96);
+
+    NSVGshape* shape;
+    NSVGpath* path;
+
+    for (shape = image->shapes; shape != NULL; shape = shape->next) {
+        printNSVGshape(*shape);
+        for (path = shape->paths; path != NULL; path = path->next) {
+            printNSVGpath(*path);
+        }
+    }
 
     size_t w=512;
     size_t h=512;
@@ -27,6 +38,7 @@ int main(int argc, char const *argv[])
     snapCircuits::NSVGtocvMat(image,w,h,mat);
     printf("Created cv Mat. Mat size %i %i\n",mat.rows,mat.cols);
 
+    // Display image
     while (1)
     {
         imshow("Original Image", mat);
@@ -44,6 +56,7 @@ int main(int argc, char const *argv[])
 
     nsvgDelete(image);
 
+    // Write to file
     imwrite("/tmp/out.png", mat);
 
     return 0;

@@ -18,7 +18,8 @@ set(folder_header_snap_circuits include/snapCircuits/utils.h
                                 include/snapCircuits/snapCircuitsBoard.h)
 
 set(folder_header_nanosvg   include/nanosvg/nanosvg.h
-                            include/nanosvg/nanosvgrast.h)
+                            include/nanosvg/nanosvgrast.h
+                            include/nanosvg/nanosvgutils.h)
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
