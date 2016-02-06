@@ -7,7 +7,7 @@
   </description>
 
   <maintainer email="alessandro.roncone@yale.edu">Alessandro Roncone</maintainer>
-  <maintainer email="olivier.mangin@yale.edu">Olivier Mangin</maintainer>
+  <!-- <maintainer email="olivier.mangin@yale.edu">Olivier Mangin</maintainer> -->
   <license>GPLv3</license>
 
   <url type="repository">https://github.com/ScazLab/snap_circuits_perception</url>
@@ -15,7 +15,7 @@
   <!-- <url type="website">http://wiki.ros.org/snap_circuits_perception</url> -->
 
   <author email="alessandro.roncone@yale.edu">Alessandro Roncone</author>
-  <author email="olivier.mangin@yale.edu">Olivier Mangin</author>
+  <!-- <author email="olivier.mangin@yale.edu">Olivier Mangin</author> -->
 
   <!-- The *_depend tags are used to specify dependencies -->
   <!-- Dependencies can be catkin packages or system dependencies -->
@@ -29,6 +29,8 @@
   <!-- Use test_depend for packages you need only for testing: -->
   <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>message_generation</build_depend>
+  <run_depend>message_runtime</run_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
