@@ -18,6 +18,7 @@
 
 #include <string>
 #include <stdio.h>
+#include <stdio.h>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -27,6 +28,8 @@
 
 #define X_MAX 10
 #define Y_MAX  8
+
+// sdt::map 
 
 namespace snapCircuits {
 

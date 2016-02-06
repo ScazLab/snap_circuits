@@ -24,12 +24,14 @@ namespace snapCircuits {
 class snapCircuitsPart
 {
 private:
-    std::string                label;
-    std::string                 name;
+    int ID;             // Order of appearance on the board
 
-    snapCircuits::snapLocation  location;
+    std::string label;  // Label as written on the physical part
+    std::string  name;  // Name as stored in the snapCircuits documentation
 
-    NSVGimage*                 image;
+    snapCircuits::snapLocation  location;  // Location
+
+    NSVGimage*                 image;      // svg image 
 
 public:
     snapCircuitsPart();
