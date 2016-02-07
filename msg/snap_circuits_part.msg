@@ -4,4 +4,3 @@ int32     id
 string label
 string  name
 location loc
-
