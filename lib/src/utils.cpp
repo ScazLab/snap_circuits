@@ -1,4 +1,5 @@
 #include "snapCircuits/utils.h"
+#include <ros/console.h>
 
 using namespace std;
 using namespace cv;
@@ -44,8 +45,32 @@ bool snapLocation::setXYMax(const int &_x_max, const int &_y_max)
 
 /*************************************************************************************/
 
-bool snapCircuits::getNameLabelfromID(const string &_id, string &name, string &label)
+bool snapCircuits::getNamefromLabel(const std::string &_label, std::string &name)
 {
+    if      (_label=="1")     { name="1-Snap Wire"; }
+    else if (_label=="2")     { name="2-Snap Wire"; }
+    else if (_label=="3")     { name="3-Snap Wire"; }
+    else if (_label=="4")     { name="4-Snap Wire"; }
+    else if (_label=="5")     { name="5-Snap Wire"; }
+    else if (_label=="6")     { name="6-Snap Wire"; }
+    else if (_label=="WC")    { name="Whistle Chip"; }
+    else if (_label=="S1")    { name="Slide Switch"; }
+    else if (_label=="S2")    { name="Press Switch"; }
+    else if (_label=="RP")    { name="Photoresistor"; }
+    else if (_label=="D1")    { name="Red LED"; }
+    else if (_label=="L1")    { name="2.5V Lamp"; }
+    else if (_label=="B1")    { name="Battery - 2x1.5V AA"; }
+    else if (_label=="SP")    { name="Speaker"; }
+    else if (_label=="U1")    { name="Music Integrated Circuit"; }
+    else if (_label=="U2")    { name="Alarm Integrated Circuit"; }
+    else if (_label=="U3")    { name="Space War Integrated Circuit"; }
+    else if (_label=="M1")    { name="Motor Fan"; }
+    else if (_label=="R1")    { name="100 Ohm Resistor"; }
+    else {
+        ROS_ERROR("[snapCircuits::getNamefromLabel] Wrong label name: %s",_label.c_str());
+        return false;
+    }
+
     return true;
 }
 

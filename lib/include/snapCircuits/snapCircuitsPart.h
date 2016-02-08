@@ -26,8 +26,9 @@ class snapCircuitsPart
 private:
     int ID;             // Order of appearance on the board
 
-    std::string label;  // Label as written on the physical part
     std::string  name;  // Name as stored in the snapCircuits documentation
+    std::string label;  // Label as written on the physical part.It is also the
+                        // filename of the svg image corresponding to the part
 
     snapCircuits::snapLocation  location;  // Location
 
