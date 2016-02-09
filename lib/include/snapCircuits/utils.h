@@ -18,7 +18,7 @@
 
 #include <string>
 #include <stdio.h>
-#include <stdio.h>
+#include <stdlib.h>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -44,13 +44,18 @@ private:
     int y_max; // max value for the y axis position (i.e. max number of rows)
 
 public:
-    // CONSTRUCTORS
+    /* CONSTRUCTORS */
     snapLocation();
     snapLocation(int _x_max, int _y_max);
     snapLocation(int _x, int _y, int _o);
     snapLocation(int _x, int _y, int _o, int _x_max, int _y_max);
 
-    // SETTERS
+    /**
+    * Copy Operator
+    **/
+    snapLocation &operator=(const snapLocation &_l);
+
+    /* SETTERS */
     bool setX(const int &_x)        {         x=_x; return true; }; 
     bool setY(const int &_y)        {         y=_y; return true; }; 
     bool setO(const int &_o)        {         o=_o; return true; }; 
@@ -60,7 +65,7 @@ public:
     bool setXYO(const int &_x, const int &_y, const int &_o);
     bool setXYMax(const int &_x_max, const int &_y_max);
 
-    // GETTERS
+    /* GETTERS */
     int getX()    {     return x; }; 
     int getY()    {     return y; }; 
     int getO()    {     return o; }; 
@@ -83,6 +88,17 @@ public:
 bool getNamefromLabel(const std::string &_label, std::string &name);
 
 /**
+ * Retrieves the svg image file associated to a specific label. It depends on a parameter stored
+ * in the parameter server that specifies the absolute path of the folder where the images
+ * are stored (usually, snap_circuits/lib/svg ). 
+ * @param  _label  is the label as written on the physical part. It is also the
+ *                 filename of the svg image corresponding to the part
+ * @param  path    is the output image file
+ * @return         true/false if success/failure
+ */
+bool checkImageFilefromLabel(const std::string &_label, std::string* path);
+
+/**
  * Converts a NSVGimage to cv::Mat
  * @param  _im    the input image
  * @param  _w     the desired width of the converted image
@@ -91,6 +107,20 @@ bool getNamefromLabel(const std::string &_label, std::string &name);
  * @return        true/false if success/failure
  */
 bool NSVGtocvMat(NSVGimage* _im, size_t _w, size_t _h, cv::Mat &result);
+
+/**
+ * Checks if a directory exists in the system given its absolute path
+ * @param  path directory to check against
+ * @return      true/false if success/failure
+ */
+bool dirExists(const char *path);
+
+/**
+ * Checks if a file exists in the system given its absolute path
+ * @param  path file to check against
+ * @return      true/false if success/failure
+ */
+bool fileExists(const char *path);
 
 };
 

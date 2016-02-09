@@ -4,6 +4,20 @@
   <version>0.0.1</version>
   <description>
     The snap_circuits package provides a package for the perception part of the snapCircuits experiments.
+
+    ## Usage
+
+    Open a ROS master in a terminal:
+
+    ```
+    roscore
+    ```
+
+    ```
+    rosrun snap_circuits snap_circuits_visualizer svg_folder:="/home/alecive/code/catkin_my_ws/snap_circuits/lib/resources"
+    ```
+
+
   </description>
 
   <maintainer email="alessandro.roncone@yale.edu">Alessandro Roncone</maintainer>

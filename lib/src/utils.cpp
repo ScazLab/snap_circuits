@@ -1,5 +1,9 @@
 #include "snapCircuits/utils.h"
-#include <ros/console.h>
+
+#include <sys/types.h>
+#include <sys/stat.h>
+
+#include <ros/ros.h>
 
 using namespace std;
 using namespace cv;
@@ -32,6 +36,18 @@ snapLocation::snapLocation(int _x, int _y, int _o, int _x_max, int _y_max)
     setXYO(_x,_y,_o);
     setXYMax(_x_max,_y_max);
 };
+
+snapLocation & snapLocation::operator=(const snapLocation &_l)
+{
+    x = _l.x;
+    y = _l.y;
+    o = _l.o;
+
+    x_max = _l.x_max;
+    y_max = _l.y_max;
+
+    return *this;
+}
 
 bool snapLocation::setXYO(const int &_x, const int &_y, const int &_o)
 {
@@ -74,6 +90,30 @@ bool snapCircuits::getNamefromLabel(const std::string &_label, std::string &name
     return true;
 }
 
+bool snapCircuits::checkImageFilefromLabel(const std::string &_label, std::string* path)
+{
+    string svg_folder="";
+
+    if (ros::param::get("snap_circuits/svg_folder", svg_folder))
+    {
+        ROS_INFO("[snapCircuits::getImagefromLabel] svg folder: %s",svg_folder.c_str());
+
+        if (dirExists(svg_folder.c_str()))
+        {
+            string fullpath=svg_folder+_label+".svg";
+
+            if (fileExists(fullpath.c_str()))
+            {
+                *path=fullpath;
+                return true;
+            }
+        }
+    }
+
+    *path="";
+    return false;
+}
+
 bool snapCircuits::NSVGtocvMat(NSVGimage* _im, size_t _w, size_t _h, cv::Mat &result)
 {
     // Create rasterizer (can be used to render multiple images).
@@ -85,7 +125,7 @@ bool snapCircuits::NSVGtocvMat(NSVGimage* _im, size_t _w, size_t _h, cv::Mat &re
 
     if (img == NULL)
     {
-        printf("ERROR: destination image data is empty!\n");
+        ROS_ERROR("[snapCircuits::NSVGtocvMat] destination image data is empty!\n");
         return false;
     }
 
@@ -98,4 +138,50 @@ bool snapCircuits::NSVGtocvMat(NSVGimage* _im, size_t _w, size_t _h, cv::Mat &re
     free(img);
 
     return true;
+}
+
+bool snapCircuits::dirExists(const char *path)
+{
+    struct stat info;
+
+    if( stat( path, &info ) != 0 )
+    {
+        ROS_ERROR_NAMED("test_only", "Cannot access %s", path);
+        return false;
+    }
+    else if( info.st_mode & S_IFDIR )
+    {
+        ROS_DEBUG_NAMED("test_only", "%s is a directory", path);
+        return true;
+    }
+    else
+    {
+        ROS_ERROR_NAMED("test_only", "%s is not a directory", path );
+        return false;
+    }
+
+    return false;
+}
+
+bool snapCircuits::fileExists(const char *path)
+{
+    struct stat info;
+
+    if( stat( path, &info ) != 0 )
+    {
+        ROS_ERROR_NAMED("test_only", "Cannot access %s", path);
+        return false;
+    }
+    else if( info.st_mode & S_IFREG )
+    {
+        ROS_DEBUG_NAMED("test_only", "%s is a file", path);
+        return true;
+    }
+    else
+    {
+        ROS_ERROR_NAMED("test_only", "%s is not a directory", path );
+        return false;
+    }
+
+    return false;
 }

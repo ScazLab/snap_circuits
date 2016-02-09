@@ -32,11 +32,26 @@ private:
 
     snapCircuits::snapLocation  location;  // Location
 
-    NSVGimage*                 image;      // svg image 
+    NSVGimage* image;      // svg image 
 
 public:
-    snapCircuitsPart();
+    /* CONSTRUCTORS */
     snapCircuitsPart(std::string _label);
+    snapCircuitsPart(std::string _label, snapCircuits::snapLocation _location);
+
+    /**
+     * Initialization method (used in the constructors because overload of the 
+     * constructor is allowed only from C++11 onward). It sets name and image
+     * from the label
+     */
+    void init();
+
+    /* SETTERS */
+    bool setImage(NSVGimage* _image);
+
+    /* GETTERS */
+    NSVGimage* getImage() { return image; };
+
     ~snapCircuitsPart();
     
 };
