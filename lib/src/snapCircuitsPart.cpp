@@ -20,7 +20,7 @@ void snapCircuitsPart::init()
 {
     ROS_INFO("[snapCircuitsPart::init]");
 
-    image=NULL;
+    svg_image=NULL;
 
     getNamefromLabel();
     getImageFilefromLabel();
@@ -94,26 +94,26 @@ bool snapCircuitsPart::loadSVGimage()
         if(!getImageFilefromLabel())
         {
             ROS_ERROR("[snapCircuitsPart::loadSVGimage] No svg file associated to the part has been found.");
-            image=NULL;
+            svg_image=NULL;
             return false;
         }
     }
 
-    image=nsvgParseFromFile(svg_file.c_str(), "px", 96);
+    svg_image=nsvgParseFromFile(svg_file.c_str(), "px", 96);
     return true;
 }
 
 bool snapCircuitsPart::setImage(NSVGimage* _image)
 {
-    image = _image;
+    svg_image = _image;
 
     return true;
 }
 
 snapCircuitsPart::~snapCircuitsPart()
 {
-    if (image!=NULL)
+    if (svg_image!=NULL)
     {
-        nsvgDelete(image);
+        nsvgDelete(svg_image);
     }
 }

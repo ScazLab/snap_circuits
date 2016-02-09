@@ -30,8 +30,8 @@ private:
     std::string label;  // Label as written on the physical part.It is also the
                         // Filename of the svg image corresponding to the part
 
-    std::string svg_file; // Full path of the svg image file associated with the part
-    NSVGimage* image;     // svg image 
+    std::string svg_file;  // Full path of the svg image file associated with the part
+    NSVGimage*  svg_image; // svg image 
 
     snapCircuits::snapLocation  location;  // Location on the board
 
@@ -74,7 +74,7 @@ public:
     bool setImage(NSVGimage* _image);
 
     /* GETTERS */
-    NSVGimage* getImage() { return image; };
+    NSVGimage* getImage() { return svg_image; };
 
     /* DESTRUCTOR */
     ~snapCircuitsPart();
