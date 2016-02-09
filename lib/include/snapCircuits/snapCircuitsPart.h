@@ -48,6 +48,11 @@ public:
     void init();
 
     /**
+    * Copy Operator
+    **/
+    snapCircuitsPart &operator=(const snapCircuitsPart &_p);
+
+    /**
      * Retrieves the name of the part from its label.
      * Originally, it was elegantly implemented as a std::map<std::string, std::tuple>, but
      * that would have required C++11 and I decided to drop it.
@@ -66,6 +71,10 @@ public:
     /**
      * Loads the svg image in memory (provided the existence of a proper SVG file
      * associated to it). Used for visualization purposes.
+     * Originally, this functionality was inside getImageFilefromLabel, but due to 
+     * limitations of the nsvg library it was not possible to keep it there.
+     * Further, it is useless to load the file in memory if it's not used for visualization
+     * and/or saving it to file.
      * @return true/false if success/failure
      */
     bool loadSVGimage();
@@ -74,7 +83,12 @@ public:
     bool setImage(NSVGimage* _image);
 
     /* GETTERS */
-    NSVGimage* getImage() { return svg_image; };
+    NSVGimage* getImage()       { return svg_image; };
+    int getID()                 { return ID;        };
+    std::string getName()       { return name;      };
+    std::string getLabel()      { return label;     };
+    std::string getSVGfile()    { return svg_file;  };
+    snapCircuits::snapLocation getLocation() { return location; };
 
     /* DESTRUCTOR */
     ~snapCircuitsPart();

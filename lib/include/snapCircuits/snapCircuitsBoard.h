@@ -32,7 +32,11 @@ private:
     std::vector<snapCircuitsPart> parts;
 
 public:
+    /* CONSTRUCTORS */
     snapCircuitsBoard();
+    snapCircuitsBoard(int _x_max, int _y_max);
+
+    /* DESTRUCTOR */
     ~snapCircuitsBoard();
     
 };

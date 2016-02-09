@@ -23,13 +23,19 @@ void snapCircuitsPart::init()
     svg_image=NULL;
 
     getNamefromLabel();
-    getImageFilefromLabel();
+    getImageFilefromLabel();  
+}
 
-    // Originally, nsvgParseFromFile was inside checkImageFilefromLabel (which was called 
-    // getImagefromLabel), but due to limitations of the nsvg library it was not possible to
-    // keep it there. I decided to move it in the constructor of the snapCircuitsPart
-    // (it does not harm so much)
-    
+snapCircuitsPart & snapCircuitsPart::operator=(const snapCircuitsPart &_p)
+{
+    // We don't want to pass the pointer to the NSVGimage, we can create it on the fly
+    ID       = _p.ID;
+    name     = _p.name;
+    label    = _p.label;
+    svg_file = _p.svg_file;
+    location = _p.location;
+
+    return *this;
 }
 
 bool snapCircuitsPart::getNamefromLabel()
