@@ -77,28 +77,6 @@ public:
 /*************************************************************************************/
 
 /**
- * This method retrieves the name and label description of the part from its ID.
- * Originally, it was elegantly implemented as a std::map<std::string, std::tuple>, but
- * that would have required C++11 and I decided to drop it.
- * @param label is the label as written on the physical part. It is also the
- *              filename of the svg image corresponding to the part
- * @param name  is the name as stored in the snapCircuits documentation.
- * @return true/false if success/failure
- */
-bool getNamefromLabel(const std::string &_label, std::string &name);
-
-/**
- * Retrieves the svg image file associated to a specific label. It depends on a parameter stored
- * in the parameter server that specifies the absolute path of the folder where the images
- * are stored (usually, snap_circuits/lib/svg ). 
- * @param  _label  is the label as written on the physical part. It is also the
- *                 filename of the svg image corresponding to the part
- * @param  path    is the output image file
- * @return         true/false if success/failure
- */
-bool checkImageFilefromLabel(const std::string &_label, std::string* path);
-
-/**
  * Converts a NSVGimage to cv::Mat
  * @param  _im    the input image
  * @param  _w     the desired width of the converted image

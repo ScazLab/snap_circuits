@@ -28,11 +28,12 @@ private:
 
     std::string  name;  // Name as stored in the snapCircuits documentation
     std::string label;  // Label as written on the physical part.It is also the
-                        // filename of the svg image corresponding to the part
+                        // Filename of the svg image corresponding to the part
 
-    snapCircuits::snapLocation  location;  // Location
+    std::string svg_file; // Full path of the svg image file associated with the part
+    NSVGimage* image;     // svg image 
 
-    NSVGimage* image;      // svg image 
+    snapCircuits::snapLocation  location;  // Location on the board
 
 public:
     /* CONSTRUCTORS */
@@ -46,14 +47,37 @@ public:
      */
     void init();
 
+    /**
+     * Retrieves the name of the part from its label.
+     * Originally, it was elegantly implemented as a std::map<std::string, std::tuple>, but
+     * that would have required C++11 and I decided to drop it.
+     * @return true/false if success/failure
+     */
+    bool getNamefromLabel();
+
+    /**
+     * Retrieves the svg image file associated to a specific label. It depends on a parameter stored
+     * in the parameter server that specifies the absolute path of the folder where the images
+     * are stored (usually, snap_circuits/lib/svg ). 
+     * @return         true/false if success/failure
+     */
+    bool getImageFilefromLabel();
+
+    /**
+     * Loads the svg image in memory (provided the existence of a proper SVG file
+     * associated to it). Used for visualization purposes.
+     * @return true/false if success/failure
+     */
+    bool loadSVGimage();
+
     /* SETTERS */
     bool setImage(NSVGimage* _image);
 
     /* GETTERS */
     NSVGimage* getImage() { return image; };
 
+    /* DESTRUCTOR */
     ~snapCircuitsPart();
-    
 };
 
 };
