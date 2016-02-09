@@ -16,7 +16,7 @@ using namespace snapCircuits;
 snapLocation::snapLocation()
 {
     setXYO(-1,-1,-1);
-    setXYMax(X_MAX,Y_MAX);
+    setXYMax(N_ROWS,N_COLS);
 };
 
 snapLocation::snapLocation(int _x_max, int _y_max)
@@ -28,7 +28,7 @@ snapLocation::snapLocation(int _x_max, int _y_max)
 snapLocation::snapLocation(int _x, int _y, int _o)
 {
     setXYO(_x,_y,_o);
-    setXYMax(X_MAX,Y_MAX);
+    setXYMax(N_ROWS,N_COLS);
 };
 
 snapLocation::snapLocation(int _x, int _y, int _o, int _x_max, int _y_max)

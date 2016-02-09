@@ -26,8 +26,8 @@
 #include "nanosvg/nanosvg.h"
 #include "nanosvg/nanosvgrast.h"
 
-#define X_MAX 10
-#define Y_MAX  8
+#define N_ROWS 10    // Number of rows on the board
+#define N_COLS  8
 
 // sdt::map 
 
