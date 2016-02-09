@@ -1,0 +1,9 @@
+<launch>
+  <env name="ROSCONSOLE_CONFIG_FILE" value="$(find snap_circuits)/rosconsole.conf"/>
+
+  <!-- xml file containing the cells of the board -->
+  <param name="snap_circuits/svg_folder" value="$(find snap_circuits)/lib/svg/" />
+
+  <node name="snap_circuits_visualizer" pkg="snap_circuits" type="snap_circuits_visualizer" respawn="false" output="screen"/>
+
+</launch>
