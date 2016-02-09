@@ -26,15 +26,20 @@ namespace snapCircuits {
 class snapCircuitsBoard
 {
 private:
-    int MAX_ROWS;
-    int MAX_COLS;
+    int n_rows;
+    int n_cols;
 
     std::vector<snapCircuitsPart> parts;
 
 public:
     /* CONSTRUCTORS */
     snapCircuitsBoard();
-    snapCircuitsBoard(int _x_max, int _y_max);
+    snapCircuitsBoard(int _n_rows, int _n_cols);
+
+    /* SETTERS */
+    bool set_n_rows(const int &_r) { n_rows=_r; return true; };
+    bool set_n_cols(const int &_c) { n_cols=_c; return true; };
+    bool set_n_rows_and_cols(const int &_r, const int &_c);
 
     /* DESTRUCTOR */
     ~snapCircuitsBoard();
