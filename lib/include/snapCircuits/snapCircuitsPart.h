@@ -79,8 +79,19 @@ public:
      */
     bool loadSVGimage();
 
+    /**
+     * Puts a state of the part into a string
+     * @param  verbosity the bigger the verbosity, the more text will be printed
+     * @return           the state of the part as a std::string
+     */
+    std::string toString(int verbosity=0);
+
     /* SETTERS */
+    bool setID(const int &_ID) { ID=_ID; return true; };
     bool setImage(NSVGimage* _image);
+
+    bool setXYMax(const int &_x_max, const int &_y_max);
+    bool setLocation(const int &_x, const int &_y, const int &_o);
 
     /* GETTERS */
     NSVGimage* getImage()       { return svg_image; };

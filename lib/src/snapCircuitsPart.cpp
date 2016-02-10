@@ -1,5 +1,7 @@
 #include "snapCircuits/snapCircuitsPart.h"
-#include <ros/console.h>
+
+#include <sstream>
+
 #include <ros/ros.h>
 
 using namespace std;
@@ -11,7 +13,7 @@ snapCircuitsPart::snapCircuitsPart(string _label) : label(_label), ID(-1)
 }
 
 snapCircuitsPart::snapCircuitsPart(std::string _label, snapLocation _location) :
-                                   ID(-1), location(_location)
+                                   label(_label), location(_location), ID(-1)
 {
     init();
 }
@@ -73,7 +75,7 @@ bool snapCircuitsPart::getImageFilefromLabel()
 
     if (ros::param::get("snap_circuits/svg_folder", svg_folder))
     {
-        ROS_INFO("[snapCircuitsPart::getImagefromLabel] svg folder: %s",svg_folder.c_str());
+        ROS_INFO("[snapCircuitsPart::getImageFilefromLabel] svg folder: %s",svg_folder.c_str());
 
         if (dirExists(svg_folder.c_str()))
         {
@@ -109,11 +111,39 @@ bool snapCircuitsPart::loadSVGimage()
     return true;
 }
 
+std::string snapCircuitsPart::toString(int verbosity)
+{
+    std::stringstream res;
+
+    res << "ID: " << ID << "\t label: "  << label;
+    if (verbosity>0)
+    {
+        res << "\t name: " << name;
+    }
+    res << "\t location: " << location.toString(verbosity);
+    if (verbosity>1)
+    {
+        res << "\n svg_file: " << svg_file;
+    }
+
+    return res.str();
+}
+
 bool snapCircuitsPart::setImage(NSVGimage* _image)
 {
     svg_image = _image;
 
     return true;
+}
+
+bool snapCircuitsPart::setXYMax(const int &_x_max, const int &_y_max)
+{
+    return location.setXYMax(_x_max,_y_max);
+}
+
+bool snapCircuitsPart::setLocation(const int &_x, const int &_y, const int &_o)
+{
+    return location.setXYO(_x, _y, _o);
 }
 
 snapCircuitsPart::~snapCircuitsPart()

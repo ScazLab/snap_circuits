@@ -27,9 +27,7 @@
 #include "nanosvg/nanosvgrast.h"
 
 #define N_ROWS 10    // Number of rows on the board
-#define N_COLS  8
-
-// sdt::map 
+#define N_COLS  8    // Number of cols on the board
 
 namespace snapCircuits {
 
@@ -55,12 +53,24 @@ public:
     **/
     snapLocation &operator=(const snapLocation &_l);
 
+    /**
+     * Resets the location to its original state
+     */
+    void resetLocation();
+
+    /**
+     * Puts the location into a string
+     * @param  verbosity the bigger the verbosity, the more text will be printed
+     * @return           the location as a std::string
+     */
+    std::string toString(int verbosity=0);
+
     /* SETTERS */
-    bool setX(const int &_x)        {         x=_x; return true; }; 
-    bool setY(const int &_y)        {         y=_y; return true; }; 
-    bool setO(const int &_o)        {         o=_o; return true; }; 
-    bool setXMax(const int &_x_max) { x_max=_x_max; return true; }; 
-    bool setYMax(const int &_y_max) { y_max=_y_max; return true; }; 
+    bool setX(const int &_x);
+    bool setY(const int &_y);
+    bool setO(const int &_o);
+    bool setXMax(const int &_x_max);
+    bool setYMax(const int &_y_max);
 
     bool setXYO(const int &_x, const int &_y, const int &_o);
     bool setXYMax(const int &_x_max, const int &_y_max);

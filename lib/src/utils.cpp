@@ -1,5 +1,6 @@
 #include "snapCircuits/utils.h"
 
+#include <sstream>
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -15,26 +16,32 @@ using namespace snapCircuits;
 
 snapLocation::snapLocation()
 {
-    setXYO(-1,-1,-1);
     setXYMax(N_ROWS,N_COLS);
+    resetLocation();
 };
 
 snapLocation::snapLocation(int _x_max, int _y_max)
 {
-    setXYO(-1,-1,-1);
     setXYMax(_x_max,_y_max);
+    resetLocation();
 };
 
 snapLocation::snapLocation(int _x, int _y, int _o)
 {
-    setXYO(_x,_y,_o);
     setXYMax(N_ROWS,N_COLS);
+    if (!setXYO(_x,_y,_o))
+    {
+        resetLocation();
+    }
 };
 
 snapLocation::snapLocation(int _x, int _y, int _o, int _x_max, int _y_max)
 {
-    setXYO(_x,_y,_o);
     setXYMax(_x_max,_y_max);
+    if (!setXYO(_x,_y,_o))
+    {
+        resetLocation();
+    }
 };
 
 snapLocation & snapLocation::operator=(const snapLocation &_l)
@@ -48,6 +55,97 @@ snapLocation & snapLocation::operator=(const snapLocation &_l)
 
     return *this;
 }
+
+void snapLocation::resetLocation()
+{
+    x = -1;
+    y = -1;
+    o = -1;
+}
+
+std::string snapLocation::toString(int verbosity)
+{
+    std::stringstream res;
+
+    res << "[x : " << x << " y: " << y << " o: " << o << "]";
+    if (verbosity>0)
+    {
+        res << "\t[x_max: " << x_max << " y_max: " << y_max << "]";
+    }
+
+    return res.str();
+}
+
+bool snapLocation::setX(const int &_x)
+{
+    if (_x>=0 && _x<x_max)
+    {
+        x=_x;
+        return true;
+    }
+    else
+    {
+        ROS_ERROR("[snapLocation::setX] out of bounds assignment: requested %i, allowed [%i %i]",_x,0,x_max-1);
+        return false;
+    }
+}
+
+bool snapLocation::setY(const int &_y)
+{
+    if (_y>=0 && _y<y_max)
+    {
+        y=_y;
+        return true;
+    }
+    else
+    {
+        ROS_ERROR("[snapLocation::setY] out of bounds assignment: requested %i, allowed [%i %i]",_y,0,y_max-1);
+        return false;
+    }
+}
+
+bool snapLocation::setO(const int &_o)
+{
+    if (_o==0 || _o==90 || _o==180 || _o==270 || _o==360)
+    {
+        o=_o;
+        if (o==360)
+        {
+            o=0;
+        }
+        return true;
+    }
+    else
+    {
+        ROS_ERROR("[snapLocation::setO] orientation %i is not permitted. Please use [0, 90, 180, 270].",_o);
+        return false;
+    }
+
+}
+
+bool snapLocation::setXMax(const int &_x_max)
+{
+    if (_x_max<1)
+    {
+        ROS_ERROR("[snapLocation::setYMax] cannot assign a x_max lower than 1 (it was %i)",_x_max);
+        return false;
+    }
+
+    x_max=_x_max;
+    return true;
+}
+
+bool snapLocation::setYMax(const int &_y_max)
+{
+    if (_y_max<1)
+    {
+        ROS_ERROR("[snapLocation::setXMax] cannot assign a y_max lower than 1 (it was %i)",_y_max);
+        return false;
+    }
+
+    y_max=_y_max;
+    return true;
+} 
 
 bool snapLocation::setXYO(const int &_x, const int &_y, const int &_o)
 {
@@ -93,17 +191,17 @@ bool snapCircuits::dirExists(const char *path)
 
     if( stat( path, &info ) != 0 )
     {
-        ROS_ERROR_NAMED("test_only", "Cannot access %s", path);
+        ROS_ERROR_NAMED("test_only", "[snapCircuits::dirExists] Cannot access %s", path);
         return false;
     }
     else if( info.st_mode & S_IFDIR )
     {
-        ROS_DEBUG_NAMED("test_only", "%s is a directory", path);
+        ROS_DEBUG_NAMED("test_only", "[snapCircuits::dirExists] %s is a directory", path);
         return true;
     }
     else
     {
-        ROS_ERROR_NAMED("test_only", "%s is not a directory", path );
+        ROS_ERROR_NAMED("test_only", "[snapCircuits::dirExists] %s is not a directory", path );
         return false;
     }
 
@@ -116,17 +214,17 @@ bool snapCircuits::fileExists(const char *path)
 
     if( stat( path, &info ) != 0 )
     {
-        ROS_ERROR_NAMED("test_only", "Cannot access %s", path);
+        ROS_WARN_NAMED("test_only", "[snapCircuits::fileExists] Cannot access %s", path);
         return false;
     }
     else if( info.st_mode & S_IFREG )
     {
-        ROS_DEBUG_NAMED("test_only", "%s is a file", path);
+        ROS_DEBUG_NAMED("test_only", "[snapCircuits::fileExists] %s is a file", path);
         return true;
     }
     else
     {
-        ROS_ERROR_NAMED("test_only", "%s is not a directory", path );
+        ROS_ERROR_NAMED("test_only", "[snapCircuits::fileExists] %s is not a file", path );
         return false;
     }
 
