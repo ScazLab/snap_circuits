@@ -12,7 +12,9 @@ find_package(catkin REQUIRED COMPONENTS
              roscpp
              rospy
              std_msgs
-             message_generation)
+             message_generation
+             image_transport
+             cv_bridge)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -130,11 +132,12 @@ add_executable(tester     snap_circuits_visualizer/tester.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# add_dependencies(snap_circuits_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(visualizer ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(tester     ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(visualizer ${catkin_LIBRARIES} nanosvg snapCircuits )
-target_link_libraries(tester     ${catkin_LIBRARIES} nanosvg snapCircuits )
+target_link_libraries(visualizer nanosvg snapCircuits ${catkin_LIBRARIES} )
+target_link_libraries(tester     nanosvg snapCircuits ${catkin_LIBRARIES} )
 
 #############
 ## Install ##

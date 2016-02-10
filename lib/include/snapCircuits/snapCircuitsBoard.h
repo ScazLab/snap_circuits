@@ -64,7 +64,7 @@ public:
      * n_rows and n_cols will be preserved.
      * @return true/false if success/failure
      */
-    bool resetBoard();
+    bool reset();
 
     /* SETTERS */
     bool set_n_rows(const int &_r) { n_rows=_r; return true; };

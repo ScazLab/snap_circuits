@@ -1,80 +1,59 @@
-#include "snapCircuits/utils.h"
-#include "snapCircuits/snapCircuitsPart.h"
+#include "snap_circuits/snap_circuits_board.h"
 #include "snapCircuits/snapCircuitsBoard.h"
 
-#define NANOSVG_IMPLEMENTATION      // Expands implementation
-#define NANOSVGRAST_IMPLEMENTATION  // Expands implementation
-
-// #include "nanosvg/nanosvg.h"
-#include "nanosvg/nanosvgrast.h"
-#include "nanosvg/nanosvgutils.h"
-
-#include <vector>
-
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
+#include <string>
 
 #include <ros/ros.h>
+#include <image_transport/image_transport.h>
 
-using namespace cv;
 using namespace std;
 using namespace snapCircuits;
 
-int main(int argc, char** argv)
+class Visualizer
 {
-    ros::init(argc, argv, "snap_circuits_visualizer");
+private:
+    ros::NodeHandle nodeHandle;
+    ros::Subscriber subscriber;
 
-    snapCircuitsPart spPart("WC",snapLocation(7,1,360,10,8));
+    image_transport::ImageTransport imageTransport;
+    image_transport::Publisher      imagePublisher;
 
     snapCircuitsBoard board;
-    board.addPart(spPart);
-    board.addPart(snapCircuitsPart("S1",snapLocation(1,1,90)));
-    board.removePart(1);
-    board.addPart(snapCircuitsPart("S1",snapLocation(2,4,90)));
-    board.addPart(snapCircuitsPart("S1",snapLocation(1,5,270)));
-    board.addPart(snapCircuitsPart("S1",snapLocation(3,3,180)));
-    board.print(1);
-    board.removePart(10);
 
-    spPart.loadSVGimage();
-
-    if (spPart.getImage()!=NULL)
+    void boardCallback(const snap_circuits::snap_circuits_board::ConstPtr& msg)
     {
-        for (NSVGshape* shape = spPart.getImage()->shapes; shape != NULL; shape = shape->next) {
-            printNSVGshape(*shape);
-            for (NSVGpath*   path = shape->paths; path != NULL; path = path->next) {
-                printNSVGpath(*path);
-            }
-        }
+        board.reset();
+        // board.set_n_rows_and_cols(msg.n_rows,msg.n_cols);
+    };
 
-        size_t w=512;
-        size_t h=512;
+public:
+    Visualizer(string sub, string pub) : imageTransport(nodeHandle)
+    {
+        subscriber     = nodeHandle.subscribe(sub.c_str(),1,&Visualizer::boardCallback, this);
+        imagePublisher = imageTransport.advertise(pub,1);
+    };
 
-        Mat mat;
-        snapCircuits::NSVGtocvMat(spPart.getImage(),w,h,mat);
-        ROS_INFO("Created cv Mat. Mat size %i %i\n",mat.rows,mat.cols);
+    ~Visualizer() {};
+};
 
-        // Display image
-        while (1)
+int main(int argc, char** argv)
+{
+    std::string sub = "snap_circuits/board_state";
+    std::string pub = "snap_circuits/board_visualization";
+
+    if (argc>1)
+    {
+        sub=std::string(argv[1]);
+    
+        if (argc>2)
         {
-            imshow("Original Image", mat);
-
-            int c = cvWaitKey(30);
-            if (c == ' ')
-            {
-                break;
-            }
-            if (c == 'q' || c == 'Q' || c == 27)
-            {
-                return 0;
-            }
+            pub=std::string(argv[2]);
         }
-
-        // nsvgDelete(image);
-
-        // Write to file
-        imwrite("/tmp/out.png", mat);
     }
+
+    ros::init(argc, argv, "visualizer");
+    Visualizer visualizer(sub,pub);
+    ros::spin();
 
     return 0;
 }

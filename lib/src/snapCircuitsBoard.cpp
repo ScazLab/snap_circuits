@@ -7,13 +7,13 @@ using namespace snapCircuits;
 snapCircuitsBoard::snapCircuitsBoard()
 {
     set_n_rows_and_cols(N_ROWS,N_COLS);
-    resetBoard();
+    reset();
 }
 
 snapCircuitsBoard::snapCircuitsBoard(int _n_rows, int _n_cols)
 {
     set_n_rows_and_cols(_n_rows,_n_cols);
-    resetBoard();
+    reset();
 }
 
 bool snapCircuitsBoard::addPart(snapCircuitsPart _p)
@@ -55,7 +55,7 @@ void snapCircuitsBoard::print(int verbosity)
     ROS_INFO("*****************************");
 }
 
-bool snapCircuitsBoard::resetBoard()
+bool snapCircuitsBoard::reset()
 {
     current_id = 0;
     parts.clear();
