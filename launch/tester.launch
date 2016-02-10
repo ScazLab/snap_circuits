@@ -4,6 +4,6 @@
   <!-- xml file containing the cells of the board -->
   <param name="snap_circuits/svg_folder" value="$(find snap_circuits)/lib/svg/" />
 
-  <node name="visualizer" pkg="snap_circuits" type="visualizer" respawn="false" output="screen"/>
+  <node name="tester" pkg="snap_circuits" type="tester" respawn="false" output="screen"/>
 
 </launch>
