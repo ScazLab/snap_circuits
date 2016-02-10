@@ -7,4 +7,4 @@ Header header
 
 int32                n_rows
 int32                n_cols
-snap_circuits_part[] board
+snap_circuits_part[] parts

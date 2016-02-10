@@ -51,7 +51,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate messages in the 'msg' folder
 add_message_files(
   FILES
-  location.msg
+  snap_location.msg
   snap_circuits_part.msg
   snap_circuits_board.msg
 )

@@ -1,3 +1,6 @@
+#define NANOSVG_IMPLEMENTATION      // Expands implementation of nanosvg.h
+#define NANOSVGRAST_IMPLEMENTATION  // Expands implementation of nanosvgrast.h
+
 #include "snap_circuits/snap_circuits_board.h"
 #include "snapCircuits/snapCircuitsBoard.h"
 
@@ -23,7 +26,23 @@ private:
     void boardCallback(const snap_circuits::snap_circuits_board::ConstPtr& msg)
     {
         board.reset();
-        // board.set_n_rows_and_cols(msg.n_rows,msg.n_cols);
+        board.set_n_rows_and_cols(msg->n_rows,msg->n_cols);
+        // snapCircuitsPart p = partFromMessage(msg->parts[0],msg->n_rows,msg->n_cols);
+    };
+
+    // snapCircuitsPart partFromMessage(const snap_circuits::snap_circuits_part::ConstPtr & msg,
+    //                                  const int n_rows, const int n_cols)
+    // {
+    //     snapLocation location = locationFromMessage(&(msg->loc),n_rows,n_cols);
+    //     snapCircuitsPart part(msg->label,location);
+    //     part.setID(msg->ID);
+    //     return part;
+    // };
+
+    snapLocation locationFromMessage(const snap_circuits::snap_location::ConstPtr & msg,
+                                     const int n_rows, const int n_cols)
+    {
+        return snapLocation(msg->x,msg->y,msg->o,n_rows,n_cols);
     };
 
 public:
