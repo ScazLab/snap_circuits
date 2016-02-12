@@ -42,7 +42,8 @@ snapCircuitsPart & snapCircuitsPart::operator=(const snapCircuitsPart &_p)
 
 bool snapCircuitsPart::getNamefromLabel()
 {
-    if      (label=="1")     { name="1-Snap Wire"; }
+    if      (label=="BG")    { name="Base Grid"; }
+    else if (label=="1")     { name="1-Snap Wire"; }
     else if (label=="2")     { name="2-Snap Wire"; }
     else if (label=="3")     { name="3-Snap Wire"; }
     else if (label=="4")     { name="4-Snap Wire"; }

@@ -33,6 +33,8 @@ private:
 
     unsigned int current_id; // the ID to assign to the next part that is going to be added
 
+    NSVGimage*  svg_image; // the global svg image with the board and the parts
+
 public:
     /* CONSTRUCTORS */
     snapCircuitsBoard();
@@ -54,6 +56,12 @@ public:
     bool removePart(const int &_ID);
 
     /**
+     * Creates an svg based on the existing parts and the board picture.
+     * @return  true/false if success/failure
+     */
+    bool createSVGimage();
+
+    /**
      * Prints the state of the board
      * @param verbosity the bigger the verbosity, the more text will be printed
      */
@@ -72,8 +80,7 @@ public:
     bool set_n_rows_and_cols(const int &_r, const int &_c);
 
     /* DESTRUCTOR */
-    ~snapCircuitsBoard() {};
-    
+    ~snapCircuitsBoard();
 };
 
 };

@@ -44,6 +44,11 @@ bool snapCircuitsBoard::removePart(const int &_ID)
     return false;
 }
 
+bool snapCircuitsBoard::createSVGimage()
+{
+
+}
+
 void snapCircuitsBoard::print(int verbosity)
 {
     ROS_INFO("*****************************");
@@ -59,9 +64,19 @@ bool snapCircuitsBoard::reset()
 {
     current_id = 0;
     parts.clear();
+    addPart(snapCircuitsPart("BG")); // The base grid is always the first element
+    svg_image = NULL;
 }
 
 bool snapCircuitsBoard::set_n_rows_and_cols(const int &_r, const int &_c)
 {
     return set_n_rows(_r) && set_n_cols(_c);
+}
+
+snapCircuitsBoard::~snapCircuitsBoard()
+{
+    if (svg_image!=NULL)
+    {
+        nsvgDelete(svg_image);
+    }
 }

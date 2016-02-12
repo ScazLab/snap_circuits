@@ -1,30 +1,17 @@
-/*
- * Copyright (c) 2013-14 Mikko Mononen memon@inside.org
+/**
+ * Copyright (C) 2016 Social Robotics Lab, Yale University
+ * Author: Alessandro Roncone
+ * email:  alessandro.roncone@yale.edu
+ * website: www.scazlab.yale.edu
+ * Permission is granted to copy, distribute, and/or modify this program
+ * under the terms of the GNU General Public License, version 3 or any
+ * later version published by the Free Software Foundation.
  *
- * This software is provided 'as-is', without any express or implied
- * warranty.  In no event will the authors be held liable for any damages
- * arising from the use of this software.
- *
- * Permission is granted to anyone to use this software for any purpose,
- * including commercial applications, and to alter it and redistribute it
- * freely, subject to the following restrictions:
- *
- * 1. The origin of this software must not be misrepresented; you must not
- * claim that you wrote the original software. If you use this software
- * in a product, an acknowledgment in the product documentation would be
- * appreciated but is not required.
- * 2. Altered source versions must be plainly marked as such, and must not be
- * misrepresented as being the original software.
- * 3. This notice may not be removed or altered from any source distribution.
- *
- * The SVG parser is based on Anti-Grain Geometry 2.4 SVG example
- * Copyright (C) 2002-2004 Maxim Shemanarev (McSeem) (http://www.antigrain.com/)
- *
- * Arc calculation code based on canvg (https://code.google.com/p/canvg/)
- *
- * Bounding box calculation based on http://blog.hackers-cafe.net/2009/06/how-to-calculate-bezier-curves-bounding.html
- *
- */
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ * Public License for more details
+**/
 
 #ifndef NANOSVGUTILS_H
 #define NANOSVGUTILS_H
