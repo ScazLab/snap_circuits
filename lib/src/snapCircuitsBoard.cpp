@@ -1,4 +1,5 @@
 #include "snapCircuits/snapCircuitsBoard.h"
+#include "nanosvg/nanosvgutils.h"
 #include <ros/console.h>
 
 using namespace std;
@@ -46,7 +47,25 @@ bool snapCircuitsBoard::removePart(const int &_ID)
 
 bool snapCircuitsBoard::createSVGimage()
 {
+    if (svg_image==NULL)
+    {
+        parts[0].loadSVGimage();
+        svg_image = parts[0].getImage();
+    }
 
+    // printf("[%i] %i %i \n",i,parts[i].getImage()->shapes != NULL,svg_image!=NULL);
+
+    for (int i = 1; i < parts.size(); ++i)
+    {
+        parts[i].loadSVGimage();
+
+        printf("[%i] %i %i \n",i,parts[i].getImage()->shapes != NULL,svg_image!=NULL);
+        if (parts[i].getImage()->shapes != NULL)
+        {
+            appendNSVGshape(svg_image,parts[i].getImage()->shapes);
+        }
+        printf("[%i]\n",i);
+    }
 }
 
 void snapCircuitsBoard::print(int verbosity)

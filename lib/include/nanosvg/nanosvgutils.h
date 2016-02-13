@@ -19,7 +19,8 @@
 #include "nanosvg/nanosvg.h"
 #include <stdio.h>
 
-void printNSVGpath(NSVGpath _p) {
+void printNSVGpath(NSVGpath _p)
+{
 	printf("Number of points: %i\t", _p.npts);
 
 	for (int i = 0; i < _p.npts; ++i)
@@ -29,8 +30,37 @@ void printNSVGpath(NSVGpath _p) {
 	printf("\n");
 }
 
-void printNSVGshape(NSVGshape _s) {
+void printNSVGshape(NSVGshape _s)
+{
 	printf("ID: %s\n", _s.id);
+}
+
+NSVGshape* findLast(NSVGshape *_s)
+{
+    if (_s==NULL) return _s;
+
+    NSVGshape* res=_s;
+
+    while(res->next!=NULL)
+    {
+        res=res->next;
+    }
+
+    return res;
+}
+
+void appendNSVGshape(NSVGimage *_i, NSVGshape* _s)
+{
+    NSVGshape* last=findLast(_i->shapes);
+
+    if (last==NULL)
+    {
+        _i->shapes=_s;
+    }
+    else
+    {
+        last->next=_s;
+    }
 }
 
 #endif

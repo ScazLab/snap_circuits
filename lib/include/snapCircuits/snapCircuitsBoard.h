@@ -74,6 +74,9 @@ public:
      */
     bool reset();
 
+    /* GETTERS */
+    NSVGimage* getImage()       { return svg_image; };
+
     /* SETTERS */
     bool set_n_rows(const int &_r) { n_rows=_r; return true; };
     bool set_n_cols(const int &_c) { n_cols=_c; return true; };
