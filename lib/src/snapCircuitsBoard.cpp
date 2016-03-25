@@ -47,24 +47,23 @@ bool snapCircuitsBoard::removePart(const int &_ID)
 
 bool snapCircuitsBoard::createSVGimage()
 {
-    if (svg_image==NULL)
-    {
-        parts[0].loadSVGimage();
-        svg_image = parts[0].getImage();
-    }
+    // if (svg_image==NULL)
+    // {
+    //     parts[0].loadSVGimage();
+    //     svg_image = parts[0].getImage();
+    // }
 
     // printf("[%i] %i %i \n",i,parts[i].getImage()->shapes != NULL,svg_image!=NULL);
 
-    for (int i = 1; i < parts.size(); ++i)
+    for (int i = 0; i < parts.size(); ++i)
     {
         parts[i].loadSVGimage();
 
         printf("[%i] %i %i \n",i,parts[i].getImage()->shapes != NULL,svg_image!=NULL);
         if (parts[i].getImage()->shapes != NULL)
         {
-            appendNSVGshape(svg_image,parts[i].getImage()->shapes);
+            nsvgAppendShape(svg_image,parts[i].getImage()->shapes);
         }
-        printf("[%i]\n",i);
     }
 }
 
@@ -84,7 +83,16 @@ bool snapCircuitsBoard::reset()
     current_id = 0;
     parts.clear();
     addPart(snapCircuitsPart("BG")); // The base grid is always the first element
-    svg_image = NULL;
+
+    svg_image = (NSVGimage*)malloc(sizeof(NSVGimage));
+    if (svg_image == NULL) 
+    {
+        free(svg_image);
+        return false;
+    }
+    memset(svg_image, 0, sizeof(NSVGimage));
+
+    return true;
 }
 
 bool snapCircuitsBoard::set_n_rows_and_cols(const int &_r, const int &_c)

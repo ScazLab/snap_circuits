@@ -158,15 +158,14 @@ bool snapLocation::setXYMax(const int &_x_max, const int &_y_max)
 }
 
 /*************************************************************************************/
+/*                                    UTILS                                          */
+/*************************************************************************************/
 
 bool snapCircuits::NSVGtocvMat(NSVGimage* _im, size_t _w, size_t _h, cv::Mat &result)
 {
-    // Create rasterizer (can be used to render multiple images).
-    NSVGrasterizer* rast = nsvgCreateRasterizer();
-    // Allocate memory for image
-    unsigned char* img = (unsigned char*) malloc(_w*_h*4);
-    // Rasterize
-    nsvgRasterize(rast, _im, 0,0,1, img, _w, _h, _w*4);
+    NSVGrasterizer* rast = nsvgCreateRasterizer();          // Create rasterizer (can be used to render multiple images).
+    unsigned char* img = (unsigned char*) malloc(_w*_h*4);  // Allocate memory for image
+    nsvgRasterize(rast, _im, 0,0,1, img, _w, _h, _w*4);     // Rasterize
 
     if (img == NULL)
     {
@@ -179,8 +178,8 @@ bool snapCircuits::NSVGtocvMat(NSVGimage* _im, size_t _w, size_t _h, cv::Mat &re
     cv::cvtColor(res, res, CV_RGBA2BGRA);
     result = res.clone();   // I am cloning the image so that I can later free the malloc
 
-    nsvgDeleteRasterizer(rast);
-    free(img);
+    nsvgDeleteRasterizer(rast);     // Delete the rasterizer
+    free(img);                      // Free the memory that has been allocated for the image
 
     return true;
 }
