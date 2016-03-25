@@ -1,0 +1,6 @@
+<launch>
+  <env name="ROSCONSOLE_CONFIG_FILE" value="$(find snap_circuits)/rosconsole.conf"/>
+
+  <node name="board_detector" pkg="snap_circuits" type="board_detector" respawn="false" output="screen"/>
+
+</launch>
