@@ -23,6 +23,13 @@ int main(int argc, char** argv)
 
     snapCircuitsPart spPart("WC",snapLocation(7,1,360,10,8));
 
+    if (spPart.loadSVGimage())
+    {
+        for (NSVGshape* shape = spPart.getImage()->shapes; shape != NULL; shape = shape->next) {
+            printNSVGshape(shape);
+        }
+    }
+
     snapCircuitsBoard board;
     board.addPart(spPart);
     board.createSVGimage();
@@ -35,17 +42,10 @@ int main(int argc, char** argv)
     // board.print(1);
     // board.removePart(10);
 
-    // spPart.loadSVGimage();
+    
 
     if (board.getImage()!=NULL)
     {
-        // for (NSVGshape* shape = spPart.getImage()->shapes; shape != NULL; shape = shape->next) {
-        //     printNSVGshape(*shape);
-        //     for (NSVGpath*   path = shape->paths; path != NULL; path = path->next) {
-        //         printNSVGpath(*path);
-        //     }
-        // }
-
         size_t w=1024;
         size_t h=600;
 
@@ -75,5 +75,6 @@ int main(int argc, char** argv)
         imwrite("/tmp/out.png", mat);
     }
 
+    printf("Closing..\n");
     return 0;
 }

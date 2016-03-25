@@ -62,8 +62,8 @@ public:
 
 int main(int argc, char** argv)
 {
-    std::string sub = "snap_circuits/board_state";
-    std::string pub = "snap_circuits/board_visualization";
+    std::string sub = "/snap_circuits/board_state";
+    std::string pub = "/snap_circuits/board_visualization";
 
     if (argc>1)
     {
