@@ -26,7 +26,7 @@ bool isEqual(const cv::Vec2f& _l1, const cv::Vec2f& _l2)
     float angle=abs(theta2-theta1);
     float dist=abs(rho1-rho2);
 
-    ROS_DEBUG("[BoardDetector] Angle is %g\tDist is %g", angle, dist);
+    ROS_DEBUG("[BoardCalibrator] Angle is %g\tDist is %g", angle, dist);
 
     if (angle > MIN_ANGLE || dist > MIN_DIST)
     {
@@ -36,25 +36,30 @@ bool isEqual(const cv::Vec2f& _l1, const cv::Vec2f& _l2)
     return true;
 }
 
-class BoardDetector
+class BoardCalibrator
 {
 private:
+    std::string name;
+    std::string  sub;
+    std::string  pub;
+
     ros::NodeHandle nodeHandle;
 
     image_transport::ImageTransport imageTransport;
     image_transport::Subscriber     imageSubscriber;
 
-    // image_transport::Publisher      imagePublisher;
+    // image_transport::ImageTransport imageTranspPub;
+    image_transport::Publisher      imagePublisher;
 
     bool doShow;
 
-    void callback(const sensor_msgs::ImageConstPtr& msg)
+    void callback(const sensor_msgs::ImageConstPtr& msgIn)
     {
         // Let's convert the ROS image to OpenCV image format
         cv_bridge::CvImageConstPtr cv_ptr;
         try
         {
-            cv_ptr = cv_bridge::toCvShare(msg, sensor_msgs::image_encodings::BGR8);
+            cv_ptr = cv_bridge::toCvShare(msgIn, sensor_msgs::image_encodings::BGR8);
         }
         catch (cv_bridge::Exception& e)
         {
@@ -95,7 +100,7 @@ private:
         }
         numberOfClusters++;
 
-        ROS_INFO("[BoardDetector] Number of lines: %zu\tNumber of clusters: %i ", lines.size(), numberOfClusters);
+        ROS_INFO("[BoardCalibrator] Number of lines: %zu\tNumber of clusters: %i ", lines.size(), numberOfClusters);
         
         if (numberOfClusters >= 4)
         {
@@ -125,7 +130,7 @@ private:
                 }
             }
 
-            // printf("[BoardDetector] corners: ");
+            // printf("[BoardCalibrator] corners: ");
             // for (int i = 0; i < corners.size(); ++i)
             // {
             //     printf("[%g %g]\t", corners[i].x, corners[i].y );
@@ -166,7 +171,7 @@ private:
             if (corners.size()==4)
             {
                 // Define the destination image
-                cv::Mat quad = cv::Mat::zeros(770, 1100, CV_8UC3);
+                cv::Mat quad = cv::Mat::zeros(385, 550, CV_8UC3);
                 // Determine top-left, bottom-left, top-right, and bottom-right corner
                 // Get mass center
                 cv::Point2f center(0,0);
@@ -193,8 +198,15 @@ private:
 
                 if (doShow)
                 {
-                    cv::imshow("camera_undistorted",quad);
+                    cv::imshow("image_undistorted",quad);
                 }
+
+                cv_bridge::CvImage msgOut;
+                // msgOut.header   = msgIn->header; // Same timestamp as input image
+                msgOut.encoding = sensor_msgs::image_encodings::BGR8;
+                msgOut.image    = cv_ptr->image;
+
+                imagePublisher.publish(msgOut.toImageMsg());
             }
         }
 
@@ -266,34 +278,39 @@ private:
     }
 
 public:
-    BoardDetector(bool _show, string _sub, string _pub) : imageTransport(nodeHandle)
+    BoardCalibrator(string _name) : name(_name), imageTransport(nodeHandle)
     {
-        doShow          = _show;
-        imageSubscriber = imageTransport.subscribe(_sub.c_str(),1,&BoardDetector::callback, this);
-        // imagePublisher = imageTransport.advertise(_pub,1);
+        nodeHandle.param(("/"+name+"/show").c_str(), doShow, true);
+        nodeHandle.param<std::string>(("/"+name+"/sub").c_str(), sub, "/usb_cam/image_raw");
+        nodeHandle.param<std::string>(("/"+name+"/pub").c_str(), pub, "/board_calibrator/image_undistorted");
 
-        ROS_INFO("[BoardDetector] Show param set to %i",doShow);
+        imageSubscriber = imageTransport.subscribe(sub.c_str(),1,&BoardCalibrator::callback, this);
+        imagePublisher  = imageTransport.advertise(pub,1);
+
+        ROS_INFO("[BoardCalibrator] Show param set to %i", doShow);
+        ROS_INFO("[BoardCalibrator] Subscribing    to %s", sub.c_str());
+        ROS_INFO("[BoardCalibrator] Publishing     to %s", pub.c_str());
 
         if (doShow)
         {
-            ROS_INFO("[BoardDetector] Creating windows..");
-            cv::namedWindow("camera_undistorted");
+            ROS_INFO("[BoardCalibrator] Creating windows..");
+            cv::namedWindow("image_undistorted");
             cv::namedWindow("camera_thresholded");
             cv::namedWindow("camera_edges");
             cv::startWindowThread();
 
-            cv::moveWindow("camera_thresholded",3200,50);
-            cv::moveWindow("camera_edges",3200,600);
-            cv::moveWindow("camera_undistorted",3600,200);
+            cv::moveWindow("camera_thresholded",3000,50);
+            cv::moveWindow("camera_edges",3000,600);
+            cv::moveWindow("image_undistorted",3600,200);
         }
     };
 
-    ~BoardDetector()
+    ~BoardCalibrator()
     {
         if (doShow)
         {
-            ROS_INFO("[BoardDetector] Destroying windows..");
-            cv::destroyWindow("camera_undistorted");
+            ROS_INFO("[BoardCalibrator] Destroying windows..");
+            cv::destroyWindow("image_undistorted");
             cv::destroyWindow("camera_thresholded");
             cv::destroyWindow("camera_edges");
         }
@@ -302,33 +319,39 @@ public:
 
 int main(int argc, char** argv)
 {
-    std::string sub = "/usb_cam/image_raw";
-    std::string pub = "/snap_circuits/camera_undistorted";
+    std::string name="board_calibrator";
 
-    // Very dirty way to process command line arguments. It seems that
-    // there is not a straightforward standard ROS way, unfortunately.
-    // (by alecive, all the fault goes to him)
+    ros::init(argc, argv, name.c_str());
+    std::string sub = "/usb_cam/image_raw";
+    std::string pub = "/board_calibrator/image_undistorted";
     bool show=false;
+
+    // Dirty way to process command line arguments. It seems that
+    // there is not a straightforward standard ROS way, unfortunately.
     if (argc>1)
     {
+        ros::NodeHandle nH;
+
         if (std::string(argv[1])=="--show")
         {
             show=std::string(argv[2])=="true"?true:false;
+            nH.setParam(("/"+name+"/show").c_str(), show);
         }
 
         if (argc>3)
         {
             sub=std::string(argv[3]);
+            nH.setParam( ("/"+name+"/sub").c_str(), sub.c_str());
         
             if (argc>4)
             {
                 pub=std::string(argv[4]);
+                nH.setParam( ("/"+name+"/pub").c_str(), pub.c_str());
             }
         }
     }
 
-    ros::init(argc, argv, "board_detector");
-    BoardDetector board_detector(show,sub,pub);
+    BoardCalibrator board_calibrator(name);
     ros::spin();
 
     return 0;
