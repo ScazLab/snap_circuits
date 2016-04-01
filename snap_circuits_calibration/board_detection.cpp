@@ -175,7 +175,7 @@ private:
             if (corners.size()==4)
             {
                 // Define the destination image
-                cv::Mat quad = cv::Mat::zeros(385, 550, CV_8UC3);
+                cv::Mat quad = cv::Mat::zeros(800, 1143, CV_8UC3);
                 // Determine top-left, bottom-left, top-right, and bottom-right corner
                 // Get mass center
                 cv::Point2f center(0,0);
