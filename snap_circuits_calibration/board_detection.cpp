@@ -73,12 +73,16 @@ private:
         cv::cvtColor(cv_ptr->image,img_bw,CV_BGR2GRAY);
 
         // Threshold the image to get only the black parts
-        cv::threshold(img_bw,img_bw,75,255, cv::THRESH_BINARY+cv::THRESH_OTSU);
+        cv::threshold(img_bw,img_bw,150,200, cv::THRESH_BINARY_INV+cv::THRESH_OTSU);
+
+        // cv::Mat big_blob = cv::Mat::zeros(img_bw.rows, img_bw.cols, CV_8UC3);
+        img_bw=findBiggestBlob(img_bw);
         
         if (doShow)
         {
             cv::imshow("camera_thresholded",img_bw);
         }
+
 
         // Get the edge map for finding line segments with the Canny method.
         cv::Canny(img_bw, img_bw, 100, 200*3, 3);
@@ -198,13 +202,13 @@ private:
 
                 if (doShow)
                 {
-                    cv::imshow("image_undistorted",quad);
+                    // cv::imshow("image_undistorted",quad);
                 }
 
                 cv_bridge::CvImage msgOut;
                 // msgOut.header   = msgIn->header; // Same timestamp as input image
                 msgOut.encoding = sensor_msgs::image_encodings::BGR8;
-                msgOut.image    = cv_ptr->image;
+                msgOut.image    = quad;
 
                 imagePublisher.publish(msgOut.toImageMsg());
             }
@@ -277,6 +281,32 @@ private:
         corners.push_back(bl);
     }
 
+    cv::Mat findBiggestBlob(cv::Mat & mat)
+    {
+        int largest_area=0;
+        int largest_contour_index=0;
+
+        cv::Mat res = cv::Mat::zeros(mat.rows, mat.cols, CV_8UC3);
+
+        vector< vector<cv::Point> > contours; // Vector for storing contour
+        vector<cv::Vec4i> hierarchy;
+
+        cv::findContours( mat, contours, hierarchy, 0, 2 ); // Find the extreme outer contours in the image
+
+        for( int i = 0; i< contours.size(); i++ ) {     // iterate through each contour. 
+            double a=contourArea( contours[i],false);   //  Find the area of contour
+            if(a>largest_area){
+                largest_area=a;
+                largest_contour_index=i;                //Store the index of largest contour
+            }
+        }
+
+        // res = cv::imfill(res);
+
+        cv::drawContours( res, contours, largest_contour_index, cv::Scalar(255,255,255), CV_FILLED, 8, hierarchy ); // Draw the largest contour using previously stored index.
+        return res;
+    }
+
 public:
     BoardCalibrator(string _name) : name(_name), imageTransport(nodeHandle)
     {
@@ -294,14 +324,14 @@ public:
         if (doShow)
         {
             ROS_INFO("[BoardCalibrator] Creating windows..");
-            cv::namedWindow("image_undistorted");
+            // cv::namedWindow("image_undistorted");
             cv::namedWindow("camera_thresholded");
             cv::namedWindow("camera_edges");
             cv::startWindowThread();
 
             cv::moveWindow("camera_thresholded",3000,50);
             cv::moveWindow("camera_edges",3000,600);
-            cv::moveWindow("image_undistorted",3600,200);
+            // cv::moveWindow("image_undistorted",3600,200);
         }
     };
 
@@ -310,7 +340,7 @@ public:
         if (doShow)
         {
             ROS_INFO("[BoardCalibrator] Destroying windows..");
-            cv::destroyWindow("image_undistorted");
+            // cv::destroyWindow("image_undistorted");
             cv::destroyWindow("camera_thresholded");
             cv::destroyWindow("camera_edges");
         }
