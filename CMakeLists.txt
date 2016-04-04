@@ -129,7 +129,7 @@ add_subdirectory(lib)
 ## Declare a C++ executables
 add_executable(visualizer snap_circuits_visualizer/visualizer.cpp)
 add_executable(tester     snap_circuits_visualizer/tester.cpp)
-add_executable(board_calibrator snap_circuits_calibration/board_detection.cpp)
+add_executable(board_calibrator snap_circuits_calibration/board_calibrator.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
