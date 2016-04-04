@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2016 Social Robotics Lab, Yale University
+ * Author: Alessandro Roncone
+ * email:  alessandro.roncone@yale.edu
+ * website: www.scazlab.yale.edu
+ * Permission is granted to copy, distribute, and/or modify this program
+ * under the terms of the GNU General Public License, version 3 or any
+ * later version published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ * Public License for more details
+**/
+
 #include <string>
 
 #include <ros/ros.h>
@@ -13,7 +28,17 @@
 #define MIN_DIST   15
 
 using namespace std;
+ 
 
+/**
+ * This function detects if two lines are close (distance less then MIN_DIST)
+ * and with the same angle (angle less then MIN_ANGLE). It is called by
+ * the cv::threshold method. I wasn't able to put it as a member of the class
+ * and I didn't want to waste time in understanding why :)
+ * @param  _l1 the first  line as a Vec2f (the output of the Hough transform)
+ * @param  _l2 the second line as a Vec2F (the output of the Hough transform)
+ * @return     true/false if success/failure
+ */
 bool isEqual(const cv::Vec2f& _l1, const cv::Vec2f& _l2)
 {
     cv::Vec2f l1(_l1), l2(_l2);
@@ -53,6 +78,10 @@ private:
 
     bool doShow;
 
+    /**
+     * Callback on the subscriber's topic
+     * @param msgIn an RGB image
+     */
     void callback(const sensor_msgs::ImageConstPtr& msgIn)
     {
         // Let's convert the ROS image to OpenCV image format
@@ -75,14 +104,13 @@ private:
         // Threshold the image to get only the black parts
         cv::threshold(img_bw,img_bw,150,200, cv::THRESH_BINARY_INV+cv::THRESH_OTSU);
 
-        // cv::Mat big_blob = cv::Mat::zeros(img_bw.rows, img_bw.cols, CV_8UC3);
+        // Find the biggest blob in the image (hopefully, the board), and fill it to remove the hexagons
         img_bw=findBiggestBlob(img_bw);
         
         if (doShow)
         {
             cv::imshow("camera_thresholded",img_bw);
         }
-
 
         // Get the edge map for finding line segments with the Canny method.
         cv::Canny(img_bw, img_bw, 100, 200*3, 3);
@@ -174,16 +202,10 @@ private:
 
             if (corners.size()==4)
             {
-                // Define the destination image
-                cv::Mat quad = cv::Mat::zeros(800, 1143, CV_8UC3);
+                cv::Mat quad = cv::Mat::zeros(800, 1143, CV_8UC3);  // Destination image
+                
                 // Determine top-left, bottom-left, top-right, and bottom-right corner
-                // Get mass center
-                cv::Point2f center(0,0);
-                for (int i = 0; i < corners.size(); i++)
-                    center += corners[i];
-
-                center *= (1. / corners.size());
-                sortCorners(corners, center);
+                sortCorners(corners);
 
                 // Apply the perspective transformation
 
@@ -216,6 +238,12 @@ private:
 
     };
 
+    /**
+     * Finds the intersection between two lines.
+     * @param  a the first  line as a Vec2f (the output of the Hough transform)
+     * @param  b the second line as a Vec2f (the output of the Hough transform)
+     * @return   the intersection point
+     */
     cv::Point2f findIntersection(cv::Vec2f a, cv::Vec2f b)
     {
         vector<cv::Point2f> p1 = lineToPointPair(a);
@@ -231,7 +259,9 @@ private:
     }
 
     /**
-     * Converts a Vec2f line into a pair of points
+     * Converts a Vec2f line into a pair of points.
+     * @param   line The line as a Vec2f (the output of the Hough transform)
+     * @return       The vector of points that define the line
      */
     vector<cv::Point2f> lineToPointPair(cv::Vec2f line)
     {
@@ -249,16 +279,31 @@ private:
     }
 
     /**
-     * To determine the top-left, bottom-left, top-right, and bottom right corner, we do:
-     *  1. Get the mass center.
-     *  2. Points that have lower y-axis than mass center are the top points, otherwise they are bottom points.
-     *  3. Given two top points, the one with lower x-axis is the top-left. The other is the top-right.
-     *  4. Given two bottom points, the one with lower x-axis is the bottom-left. The other is the bottom-right.
-     * @param corners [description]
-     * @param center  [description]
+     * Determine the top-left, bottom-left, top-right, and bottom-right corners.
+     * It assumes to have 4 corners. It does the following:
+     *  1. Computes the mass center.
+     *  2. Points that have lower y-axis than the mass center are the top points.
+     *  3. Given two top points, the one with lower x-axis is the top-left.
+     *  4. Given two bottom points, apply the same rule as #3
+     * @param corners the corners under consideration ()
+     * @return        true/false if success/failure
      */
-    void sortCorners(std::vector<cv::Point2f>& corners, cv::Point2f center)
+    bool sortCorners(std::vector<cv::Point2f>& corners)
     {
+        if (corners.size() != 4)
+        {
+            ROS_ERROR("[BoardCalibrator::sortCorners] The number of corners should be 4.");
+            return false;
+        }
+
+        // 1. Compute the mass center
+        cv::Point2f center(0,0);
+        for (int i = 0; i < corners.size(); i++)
+            center += corners[i];
+
+        center *= (1. / corners.size());
+        
+        // 2. Points that have lower y-axis than the mass center are the top points.
         std::vector<cv::Point2f> top, bot;
 
         for (int i = 0; i < corners.size(); i++)
@@ -269,8 +314,11 @@ private:
                 bot.push_back(corners[i]);
         }
 
+        // 3. Given two top points, the one with lower x-axis is the top-left.
         cv::Point2f tl = top[0].x > top[1].x ? top[1] : top[0];
         cv::Point2f tr = top[0].x > top[1].x ? top[0] : top[1];
+
+        // 4. Given two bottom points, apply the same rule as #3
         cv::Point2f bl = bot[0].x > bot[1].x ? bot[1] : bot[0];
         cv::Point2f br = bot[0].x > bot[1].x ? bot[0] : bot[1];
 
@@ -279,8 +327,16 @@ private:
         corners.push_back(tr);
         corners.push_back(br);
         corners.push_back(bl);
+
+        return true;
     }
 
+    /**
+     * Finds the biggest blob in the image (that should be black and white)
+     * @param  mat the image as a cv::Mat
+     * @return     the biggest blob as a cv::Mat. It is returned as a filled blob,
+     *             without any "hole" inside it.
+     */
     cv::Mat findBiggestBlob(cv::Mat & mat)
     {
         int largest_area=0;
@@ -301,13 +357,15 @@ private:
             }
         }
 
-        // res = cv::imfill(res);
-
         cv::drawContours( res, contours, largest_contour_index, cv::Scalar(255,255,255), CV_FILLED, 8, hierarchy ); // Draw the largest contour using previously stored index.
         return res;
     }
 
 public:
+
+    /**
+     * Constructor
+     */
     BoardCalibrator(string _name) : name(_name), imageTransport(nodeHandle)
     {
         nodeHandle.param(("/"+name+"/show").c_str(), doShow, true);
@@ -335,6 +393,9 @@ public:
         }
     };
 
+    /**
+     * Destructor
+     */
     ~BoardCalibrator()
     {
         if (doShow)
