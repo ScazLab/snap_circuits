@@ -16,6 +16,8 @@ find_package(catkin REQUIRED COMPONENTS
              image_transport
              cv_bridge)
 
+find_package( OpenCV REQUIRED )
+
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
@@ -119,6 +121,7 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(lib/include
+    ${OpenCV_INCLUDE_DIRS}
     ${catkin_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
@@ -138,9 +141,9 @@ add_dependencies(tester          ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EX
 add_dependencies(board_calibrator  ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(visualizer     nanosvg snapCircuits ${catkin_LIBRARIES} )
-target_link_libraries(tester         nanosvg snapCircuits ${catkin_LIBRARIES} )
-target_link_libraries(board_calibrator                    ${catkin_LIBRARIES} )
+target_link_libraries(visualizer        nanosvg snapCircuits                ${catkin_LIBRARIES} )
+target_link_libraries(tester            nanosvg snapCircuits                ${catkin_LIBRARIES} )
+target_link_libraries(board_calibrator                       ${OpenCV_LIBS} ${catkin_LIBRARIES} )
 
 #############
 ## Install ##
