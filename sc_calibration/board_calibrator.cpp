@@ -72,8 +72,6 @@ private:
 
     image_transport::ImageTransport imageTransport;
     image_transport::Subscriber     imageSubscriber;
-
-    // image_transport::ImageTransport imageTranspPub;
     image_transport::Publisher      imagePublisher;
 
     bool doShow;
