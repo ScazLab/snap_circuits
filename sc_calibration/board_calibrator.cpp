@@ -15,6 +15,8 @@
 
 #include <string>
 
+#include <pthread.h>
+
 #include <ros/ros.h>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
@@ -76,6 +78,8 @@ private:
 
     bool doShow;
 
+    pthread_mutex_t mutex;
+
     /**
      * Callback on the subscriber's topic
      * @param msgIn an RGB image
@@ -102,16 +106,24 @@ private:
         // Threshold the image to get only the black parts
         cv::threshold(img_bw,img_bw,150,200, cv::THRESH_BINARY_INV+cv::THRESH_OTSU);
 
+        // publishImage(img_bw,sensor_msgs::image_encodings::MONO8);
+
         // Find the biggest blob in the image (hopefully, the board), and fill it to remove the hexagons
-        img_bw=findBiggestBlob(img_bw);
-        
+        cv::Mat img_board(findBiggestBlob(img_bw));
+
         if (doShow)
         {
-            cv::imshow("camera_thresholded",img_bw);
+            cv::imshow("camera_thresholded",img_board);
+            cv::waitKey(5);
         }
 
         // Get the edge map for finding line segments with the Canny method.
-        cv::Canny(img_bw, img_bw, 100, 200*3, 3);
+        cv::Canny(img_board, img_bw, 30, 30*3, 5);
+       
+        if (doShow)
+        {
+            cv::imshow("camera_edges",img_bw);
+        }
 
         // Detect lines with the Hough transform method.
         // We use the probabilistic Hough transform rather than the standard one.
@@ -195,7 +207,7 @@ private:
                     cv::circle(img_bw, corners[i], 3, CV_RGB(255,255,255), 2);
                 }
                 
-                cv::imshow("camera_edges",img_bw);
+                cv::imshow("camera_lines_and_corners",img_bw);
             }
 
             if (corners.size()==4)
@@ -225,16 +237,61 @@ private:
                     // cv::imshow("image_undistorted",quad);
                 }
 
-                cv_bridge::CvImage msgOut;
-                // msgOut.header   = msgIn->header; // Same timestamp as input image
-                msgOut.encoding = sensor_msgs::image_encodings::BGR8;
-                msgOut.image    = quad;
+                publishImage(quad,sensor_msgs::image_encodings::BGR8);
+            }
+        }
+    };
 
-                imagePublisher.publish(msgOut.toImageMsg());
+    /**
+     * Publishes the image on the topic.
+     * @param mat       the image as cv::Mat
+     * @param encoding  the image encoding
+     * @return          true/false if success/failure
+     */
+    bool publishImage(cv::Mat &mat, const std::string encoding)
+    {
+        cv_bridge::CvImage msgOut;
+        msgOut.encoding = encoding;
+        msgOut.image    = mat;
+
+        imagePublisher.publish(msgOut.toImageMsg());
+        return true;
+    }
+
+    /**
+     * Finds the biggest blob in the image (that should be black and white)
+     * @param  mat the image as a cv::Mat
+     * @return     the biggest blob as a cv::Mat. It is returned as a filled blob,
+     *             without any "hole" inside it.
+     */
+    cv::Mat findBiggestBlob(cv::Mat & mat)
+    {
+        pthread_mutex_lock(&this->mutex);
+        
+        int largest_area=0;
+        int largest_contour_index=0;
+
+        cv::Mat res = cv::Mat::zeros(mat.rows, mat.cols, CV_8UC3);
+
+        vector< vector<cv::Point> > contours; // Vector for storing contour
+        vector<cv::Vec4i> hierarchy;
+
+        cv::findContours( mat, contours, hierarchy, 0, 2 ); // Find the extreme outer contours in the image
+
+        for( int i = 0; i< contours.size(); i++ ) {     // iterate through each contour. 
+            double a=contourArea( contours[i],false);   //  Find the area of contour
+            if(a>largest_area){
+                largest_area=a;
+                largest_contour_index=i;                //Store the index of largest contour
             }
         }
 
-    };
+        // Draw the largest contour using previously stored index.
+        cv::drawContours( res, contours, largest_contour_index, cv::Scalar(255,255,255), CV_FILLED, 8, hierarchy ); 
+        
+        pthread_mutex_unlock(&this->mutex);
+        return res;
+    }
 
     /**
      * Finds the intersection between two lines.
@@ -329,36 +386,6 @@ private:
         return true;
     }
 
-    /**
-     * Finds the biggest blob in the image (that should be black and white)
-     * @param  mat the image as a cv::Mat
-     * @return     the biggest blob as a cv::Mat. It is returned as a filled blob,
-     *             without any "hole" inside it.
-     */
-    cv::Mat findBiggestBlob(cv::Mat & mat)
-    {
-        int largest_area=0;
-        int largest_contour_index=0;
-
-        cv::Mat res = cv::Mat::zeros(mat.rows, mat.cols, CV_8UC3);
-
-        vector< vector<cv::Point> > contours; // Vector for storing contour
-        vector<cv::Vec4i> hierarchy;
-
-        cv::findContours( mat, contours, hierarchy, 0, 2 ); // Find the extreme outer contours in the image
-
-        for( int i = 0; i< contours.size(); i++ ) {     // iterate through each contour. 
-            double a=contourArea( contours[i],false);   //  Find the area of contour
-            if(a>largest_area){
-                largest_area=a;
-                largest_contour_index=i;                //Store the index of largest contour
-            }
-        }
-
-        cv::drawContours( res, contours, largest_contour_index, cv::Scalar(255,255,255), CV_FILLED, 8, hierarchy ); // Draw the largest contour using previously stored index.
-        return res;
-    }
-
 public:
 
     /**
@@ -366,6 +393,8 @@ public:
      */
     BoardCalibrator(string _name) : name(_name), imageTransport(nodeHandle)
     {
+        pthread_mutex_init(&this->mutex, NULL);
+
         nodeHandle.param(("/"+name+"/show").c_str(), doShow, true);
         nodeHandle.param<std::string>(("/"+name+"/sub").c_str(), sub, "/usb_cam/image_raw");
         nodeHandle.param<std::string>(("/"+name+"/pub").c_str(), pub, "/board_calibrator/image_undistorted");
@@ -380,14 +409,14 @@ public:
         if (doShow)
         {
             ROS_INFO("[BoardCalibrator] Creating windows..");
-            // cv::namedWindow("image_undistorted");
             cv::namedWindow("camera_thresholded");
             cv::namedWindow("camera_edges");
+            cv::namedWindow("camera_lines_and_corners");
             cv::startWindowThread();
 
             cv::moveWindow("camera_thresholded",3000,50);
             cv::moveWindow("camera_edges",3000,600);
-            // cv::moveWindow("image_undistorted",3600,200);
+            cv::moveWindow("camera_lines_and_corners",3600,200);
         }
     };
 
