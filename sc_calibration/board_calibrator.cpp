@@ -385,39 +385,7 @@ private:
 
         return true;
     }
-
-    /**
-     * Finds the biggest blob in the image (that should be black and white)
-     * @param  mat the image as a cv::Mat
-     * @return     the biggest blob as a cv::Mat. It is returned as a filled blob,
-     *             without any "hole" inside it.
-     */
-    cv::Mat findBiggestBlob(cv::Mat & mat)
-    {
-        int largest_area=0;
-        int largest_contour_index=0;
-
-        cv::Mat res = cv::Mat::zeros(mat.rows, mat.cols, CV_8UC3);
-
-        vector< vector<cv::Point> > contours; // Vector for storing contour
-        vector<cv::Vec4i> hierarchy;
-
-        cv::findContours( mat, contours, hierarchy, 0, 2 ); // Find the extreme outer contours in the image
-
-        for( int i = 0; i< contours.size(); i++ ) {     // iterate through each contour. 
-            double a=contourArea( contours[i],false);   //  Find the area of contour
-            if(a>largest_area){
-                largest_area=a;
-                largest_contour_index=i;                //Store the index of largest contour
-            }
-        }
-
-        // Draw the largest contour using previously stored index.
-        cv::drawContours( res, contours, largest_contour_index,
-                               cv::Scalar(255,255,255), CV_FILLED, 8, hierarchy );
-        return res;
-    }
-
+    
 public:
 
     /**
