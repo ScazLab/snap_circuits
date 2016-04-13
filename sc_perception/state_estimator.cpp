@@ -27,8 +27,8 @@
 #define NANOSVG_IMPLEMENTATION      // Expands implementation
 #define NANOSVGRAST_IMPLEMENTATION  // Expands implementation
 
-#include <snapCircuits/utils.h>
 #include <snapCircuits/snapCircuitsBoard.h>
+#include <snap_circuits/snap_circuits_board.h> 
 
 #define PXL_THRES 20
 #define MIN_AREA  300
@@ -67,7 +67,8 @@ private:
 
     image_transport::ImageTransport imageTransport;
     image_transport::Subscriber     imageSubscriber;
-    image_transport::Publisher      imagePublisher;
+    
+    ros::Publisher boardStatePublisher;
 
     cv::RNG rng;
 
@@ -192,10 +193,17 @@ private:
 
                     if (l>=1 && l<=6) 
                     {
-                        // label = int_to_string(l);
+                        label=int_to_string(l);
                     }
-
                 }
+            }
+
+            if (label!="")
+            {
+                snapCircuitsPart p(label);
+                p.setLocation(_p[i].x,_p[i].y,_p[i].o);
+                _b.addPart(p);
+
             }
         }
     };
@@ -245,6 +253,33 @@ public:
         snapCircuitsBoard board;
         createBoard(board,parts);
 
+        if (board.getNParts()>0)
+        {
+            snap_circuits::snap_circuits_board msg;
+            msg.n_rows = snapCircuits::N_ROWS;
+            msg.n_cols = snapCircuits::N_COLS;
+
+            for (int i = 0; i < board.getNParts()+1; ++i)
+            {
+                snapCircuitsPart *part = board.getPart(i);
+
+                snap_circuits::snap_circuits_part prt_msg;
+                prt_msg.ID    = part->getID();
+                prt_msg.label = part->getLabel();
+
+                snap_circuits::snap_location loc_msg;
+                loc_msg.x = part->getLocation().getX();
+                loc_msg.y = part->getLocation().getY();
+                loc_msg.o = part->getLocation().getO();
+
+                prt_msg.loc = loc_msg;
+
+                msg.parts.push_back(prt_msg);
+            }
+
+            boardStatePublisher.publish(msg);
+        }
+
         if (doShow)
         {
             // Draw the pegs
@@ -274,11 +309,11 @@ public:
     StateEstimator(string _name, string _filename) : rng(ros::Time::now().toSec()), name(_name), filename(_filename), imageTransport(nodeHandle)
     {
         nodeHandle.param(("/"+name+"/show").c_str(), doShow, true);
-        nodeHandle.param<std::string>(("/"+name+"/sub").c_str(), sub, "/board_calibrator/image_undistorted");
-        nodeHandle.param<std::string>(("/"+name+"/pub").c_str(), pub, "/state_estimator/board_state");
+        nodeHandle.param<std::string>(("/"+name+"/sub").c_str(), sub, "/snap_circuits/image_undistorted");
+        nodeHandle.param<std::string>(("/"+name+"/pub").c_str(), pub, "/snap_circuits/board_state");
 
         // imageSubscriber = imageTransport.subscribe(sub.c_str(),1,&StateEstimator::callback, this);
-        imagePublisher  = imageTransport.advertise(pub,1);
+        boardStatePublisher  = nodeHandle.advertise<snap_circuits::snap_circuits_board>(pub,1);
 
         ROS_INFO("[StateEstimator] Name       set to %s", name.c_str());
         ROS_INFO("[StateEstimator] Filename   set to %s", filename.c_str());
@@ -320,7 +355,7 @@ int main(int argc, char** argv)
     std::string filename="/home/alecive/code/catkin_my_ws/src/snap_circuits/frame0005.jpg";
 
     ros::init(argc, argv, name.c_str());
-    std::string sub = "/board_calibrator/image_undistorted";
+    std::string sub = "/snap_circuits/image_undistorted";
     std::string pub = "/state_estimator/board_state";
     bool show=false;
 

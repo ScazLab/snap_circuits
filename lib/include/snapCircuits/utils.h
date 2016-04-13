@@ -32,7 +32,7 @@ namespace snapCircuits {
 const int N_ROWS=10;    // Number of rows on the board
 const int N_COLS= 8;    // Number of cols on the board
 
-std::string int_to_string( const int a );
+std::string int_to_string( int a );
 
 class snapLocation {
 

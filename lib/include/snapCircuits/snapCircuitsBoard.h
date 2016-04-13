@@ -75,7 +75,10 @@ public:
     bool reset();
 
     /* GETTERS */
-    NSVGimage* getImage()       { return svg_image; };
+    NSVGimage* getImage()                    { return svg_image; };
+    std::vector<snapCircuitsPart> getParts() { return parts; };
+    snapCircuitsPart* getPart(int i)         { return &(parts[i]); };
+    int getNParts()                          { return parts.size()-1; }; // The first item is the board.
 
     /* SETTERS */
     bool set_n_rows(const int &_r) { n_rows=_r; return true; };
