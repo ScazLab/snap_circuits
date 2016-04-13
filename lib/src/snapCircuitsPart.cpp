@@ -20,8 +20,6 @@ snapCircuitsPart::snapCircuitsPart(std::string _label, snapLocation _location) :
 
 void snapCircuitsPart::init()
 {
-    ROS_INFO("[snapCircuitsPart::init]");
-
     svg_image=NULL;
 
     getNamefromLabel();

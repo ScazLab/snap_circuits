@@ -19,6 +19,7 @@
 #include <string>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sstream>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -26,10 +27,12 @@
 #include "nanosvg/nanosvg.h"
 #include "nanosvg/nanosvgrast.h"
 
-#define N_ROWS 10    // Number of rows on the board
-#define N_COLS  8    // Number of cols on the board
-
 namespace snapCircuits {
+
+const int N_ROWS=10;    // Number of rows on the board
+const int N_COLS= 8;    // Number of cols on the board
+
+std::string int_to_string( const int a );
 
 class snapLocation {
 

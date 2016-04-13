@@ -10,6 +10,13 @@ using namespace std;
 using namespace cv;
 using namespace snapCircuits;
 
+std::string int_to_string( const int a )
+{
+    std::stringstream ss;
+    ss << a;
+    return ss.str();
+}
+
 /*************************************************************************************/
 /*                                SNAP LOCATION                                      */
 /*************************************************************************************/

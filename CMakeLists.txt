@@ -130,20 +130,23 @@ include_directories(lib/include
 add_subdirectory(lib)
 
 ## Declare a C++ executables
-add_executable(visualizer sc_visualization/visualizer.cpp)
-add_executable(tester     sc_visualization/tester.cpp)
+add_executable(visualizer       sc_visualization/visualizer.cpp)
+add_executable(tester           sc_visualization/tester.cpp)
 add_executable(board_calibrator sc_calibration/board_calibrator.cpp)
+add_executable(state_estimator  sc_perception/state_estimator.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-add_dependencies(visualizer      ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-add_dependencies(tester          ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-add_dependencies(board_calibrator  ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(visualizer       ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(tester           ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(board_calibrator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(state_estimator  ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(visualizer        nanosvg snapCircuits                ${catkin_LIBRARIES} )
 target_link_libraries(tester            nanosvg snapCircuits                ${catkin_LIBRARIES} )
 target_link_libraries(board_calibrator                       ${OpenCV_LIBS} ${catkin_LIBRARIES} )
+target_link_libraries(state_estimator   nanosvg snapCircuits ${OpenCV_LIBS} ${catkin_LIBRARIES} )
 
 #############
 ## Install ##
