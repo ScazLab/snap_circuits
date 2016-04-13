@@ -397,7 +397,7 @@ public:
 
         nodeHandle.param(("/"+name+"/show").c_str(), doShow, true);
         nodeHandle.param<std::string>(("/"+name+"/sub").c_str(), sub, "/usb_cam/image_raw");
-        nodeHandle.param<std::string>(("/"+name+"/pub").c_str(), pub, "/board_calibrator/image_undistorted");
+        nodeHandle.param<std::string>(("/"+name+"/pub").c_str(), pub, "/snap_circuits/image_undistorted");
 
         imageSubscriber = imageTransport.subscribe(sub.c_str(),1,&BoardCalibrator::callback, this);
         imagePublisher  = imageTransport.advertise(pub,1);
@@ -441,7 +441,7 @@ int main(int argc, char** argv)
 
     ros::init(argc, argv, name.c_str());
     std::string sub = "/usb_cam/image_raw";
-    std::string pub = "/board_calibrator/image_undistorted";
+    std::string pub = "/snap_circuits/image_undistorted";
     bool show=false;
 
     // Dirty way to process command line arguments. It seems that

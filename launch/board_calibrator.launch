@@ -13,11 +13,11 @@
   <node name="board_calibrator" pkg="snap_circuits" type="board_calibrator" respawn="false" output="screen">
     <param name="show" value="true" />
     <param name="sub"  value="/usb_cam/image_raw" />
-    <param name="pub"  value="/board_calibrator/image_undistorted" />
+    <param name="pub"  value="/snap_circuits/image_undistorted" />
   </node>
 
   <node name="image_undistorted" pkg="image_view" type="image_view" respawn="false" output="screen">
-    <remap from="image" to="/board_calibrator/image_undistorted"/>
+    <remap from="image" to="/snap_circuits/image_undistorted"/>
     <param name="autosize" value="true" />
   </node>
 
