@@ -7,41 +7,38 @@ using namespace snapCircuits;
 
 snapCircuitsBoard::snapCircuitsBoard()
 {
-    reset();
     set_n_rows_and_cols(N_ROWS,N_COLS);
+    reset();
 }
 
 snapCircuitsBoard::snapCircuitsBoard(int _n_rows, int _n_cols)
 {
-    reset();
     set_n_rows_and_cols(_n_rows,_n_cols);
+    reset();
 }
 
 snapCircuitsBoard & snapCircuitsBoard::operator=(const snapCircuitsBoard &_sb)
 {
+    set_n_rows_and_cols(_sb.n_rows,_sb.n_cols);
     reset();
 
     cur_id = _sb.cur_id;
     parts  =  _sb.parts;
-
-    set_n_rows_and_cols(_sb.n_rows,_sb.n_cols);
 
     return *this;
 }
 
 snapCircuitsBoard & snapCircuitsBoard::operator=(const snap_circuits::snap_circuits_board &_sb)
 {
+    set_n_rows_and_cols(_sb.n_rows,_sb.n_cols);
     reset();
 
-    cur_id = _sb.cur_id;
-
-    for (int i = 0; i < _sb.parts.size(); ++i)
+    // The first element, the board, is not going to be added twice
+    for (int i = 1; i < _sb.parts.size(); ++i)
     {
         snap_circuits::snap_circuits_part sp = _sb.parts[i];
-        parts.push_back(snapCircuitsPart(sp));
+        addPart(snapCircuitsPart(sp));
     }
-
-    set_n_rows_and_cols(_sb.n_rows,_sb.n_cols);
 
     return *this;   
 }
@@ -145,6 +142,7 @@ bool snapCircuitsBoard::reset()
     cur_id = 0;
     parts.clear();
     addPart(snapCircuitsPart("BG")); // The base grid is always the first element
+    parts[0].setXYMax(n_rows,n_cols);
 
     svg_image = (NSVGimage*)malloc(sizeof(NSVGimage));
     if (svg_image == NULL) 
@@ -161,11 +159,6 @@ bool snapCircuitsBoard::set_n_rows_and_cols(const int &_r, const int &_c)
 {
     set_n_rows(_r);
     set_n_cols(_c);
-
-    for (int i = 0; i < parts.size(); ++i)
-    {
-        parts[i].setXYMax(_r,_c);
-    }
     return true;
 }
 

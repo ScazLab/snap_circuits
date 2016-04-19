@@ -25,30 +25,8 @@ private:
 
     void boardCallback(const snap_circuits::snap_circuits_board::ConstPtr& msg)
     {
-        board.reset();
         board=*msg;
-        // board.set_n_rows_and_cols(msg->n_rows,msg->n_cols);
-
-        // for (int i = 0; i < msg->parts.size(); ++i)
-        // {
-        //     board.addPart(partFromMessage(msg->parts[i],msg->n_rows,msg->n_cols));
-        // }
-    };
-
-    snapCircuitsPart partFromMessage(snap_circuits::snap_circuits_part msg,
-                                     const int n_rows, const int n_cols)
-    {
-        snapLocation location = locationFromMessage(msg.loc,n_rows,n_cols);
-        snapCircuitsPart part(msg.label,location);
-        part.setID(msg.ID);
-
-        return part;
-    };
-
-    snapLocation locationFromMessage(snap_circuits::snap_location msg,
-                                     const int n_rows, const int n_cols)
-    {
-        return snapLocation(msg.x,msg.y,msg.o,n_rows,n_cols);
+        board.print();
     };
 
 public:

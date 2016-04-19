@@ -406,7 +406,7 @@ int main(int argc, char** argv)
 
     ros::init(argc, argv, name.c_str());
     std::string sub = "/snap_circuits/image_undistorted";
-    std::string pub = "/state_estimator/board_state";
+    std::string pub = "/snap_circuits/board_state";
     bool show=false;
 
     // Dirty way to process command line arguments. It seems that

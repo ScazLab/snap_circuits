@@ -19,7 +19,7 @@ snapCircuitsPart::snapCircuitsPart(std::string _label, snapLocation _location) :
 }
 
 snapCircuitsPart::snapCircuitsPart(snap_circuits::snap_circuits_part &_sp) :
-                                   label(_sp.label), location(_sp.loc), ID(-1)
+                                   label(_sp.label), location(_sp.loc), ID(_sp.ID)
 {
     init();
 }
