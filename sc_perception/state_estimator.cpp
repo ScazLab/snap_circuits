@@ -211,7 +211,7 @@ private:
                 {
                     if      (color=="red")
                     {
-                        label="D1"; // This can be either D1 or WC
+                        label="WC"; // This can be either D1 or WC
                     }
                     else if (color=="green")
                     {
