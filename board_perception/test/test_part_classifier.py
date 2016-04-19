@@ -168,13 +168,13 @@ def visual_test():
         board = json.load(b)
     img = cv2.imread(os.path.join(data, 'frame0005.jpg'))
     # Create alpha channel
-    alpha = .1 * np.ones((img.shape[0], img.shape[1], 1))
+    alpha = .2 * np.ones((img.shape[0], img.shape[1], 1))
     extr = LabeledCellExtractor(alpha, board)
     vert, hori = extr.labeled_cells()
     for ((l, o), c) in vert + hori:
         if l is not None:
             c[:, :, :] = 1.  # Modifies underlying alpha
-    img = np.asarray(img * alpha, dtype=np.int8)
+    img = np.asarray(img * alpha, dtype=np.uint8)
     cv2.imshow('tags', img)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
