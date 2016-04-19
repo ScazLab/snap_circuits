@@ -39,7 +39,7 @@ bool snapCircuitsBoard::addPart(snapCircuitsPart _p)
     _p.setID(current_id);         // set the ID to the part
     current_id++;                 // increment that ID
 
-    parts.push_back(_p);                        // add the part to the board
+    parts.push_back(_p);          // add the part to the board
 
     return true;
 }

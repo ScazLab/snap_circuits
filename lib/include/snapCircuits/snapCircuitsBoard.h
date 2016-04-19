@@ -19,6 +19,8 @@
 #include "snapCircuits/utils.h"
 #include "snapCircuits/snapCircuitsPart.h"
 
+#include <snap_circuits/snap_circuits_board.h> 
+
 #include <vector>
 
 namespace snapCircuits {
