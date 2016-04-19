@@ -73,7 +73,7 @@ void snapCircuitsBoard::print(int verbosity)
     ROS_INFO("BOARD: n_rows: %i \t n_cols %i \t current_id %i",n_rows,n_cols,current_id);
     for (int i = 0; i < parts.size(); ++i)
     {
-        ROS_INFO("Part #%i: %s",i,parts[i].toString(verbosity).c_str());
+        ROS_INFO("Part #%i:\t%s",i,parts[i].toString(verbosity).c_str());
     }
     ROS_INFO("*****************************");
 }

@@ -71,6 +71,7 @@ private:
     ros::Publisher boardStatePublisher;
 
     cv::RNG rng;
+    cv::Mat img_in;
 
     bool doShow;
 
@@ -95,7 +96,7 @@ private:
         return out;
     }
 
-    vector<vector<cv::Point> > findParts(const cv::Mat &in, cv::Mat &out)
+    vector<vector<cv::Point> > findPartsHull(const cv::Mat &in, cv::Mat &out)
     {
         int largest_area=0;
         int largest_contour_index=0;
@@ -129,6 +130,7 @@ private:
             cv::convexHull(cv::Mat(big_cont[i]), hull[i], false );
         }
 
+        // And finally let's draw everything on the output image
         for( size_t i = 0; i< big_cont.size(); i++ )
         {
             cv::Scalar color( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
@@ -137,9 +139,7 @@ private:
             drawContours( out, big_cont, (int)i, color, 1, 8, vector<cv::Vec4i>(), 0, cv::Point() );
         }
 
-        // cv::drawContours( out, big_cont, -1, cv::Scalar(255,255,255), CV_FILLED, 8);
-
-        return hull;
+        return big_cont;
     }
 
     std::vector< part > detectParts(const vector< vector<cv::Point> > &hull, const vector<cv::Point> &pegs)
@@ -151,8 +151,10 @@ private:
             cv::Rect rect = cv::boundingRect(hull[i]);
 
             // Find position on the board
-            int x = (int) (rect.x-X_OFFS)/X_STEP + 1;
-            int y = (int) (rect.y-Y_OFFS)/Y_STEP + 1;
+            // The cast to double and back to int is to avoid some issues
+            // at the top and left edges (whose index should be 0)
+            int x = int((double(rect.x)-X_OFFS)/X_STEP + 1);
+            int y = int((double(rect.y)-Y_OFFS)/Y_STEP + 1);
 
             // Find size
             int h = (int) (rect.height)/X_STEP + 1;
@@ -161,8 +163,8 @@ private:
             // Find orientation: it can be either horizontal or vertical
             int o = h>w?90:0;
 
-            printf("Part %i: rect %i %i %i %i\tposition(x y) %i %i \torientation %i \tsize (h w) %i %i\n",
-                                                 i, rect.x, rect.y, rect.height, rect.width, x,y,o,h,w);
+            // printf("Part %i: rect %i %i %i %i\t",i, rect.x, rect.y, rect.height, rect.width);
+            // printf("position(x y) %i %i \torientation %i \tsize (h w) %i %i\n", x, y, o, h, w);
 
             res.push_back(part(x,y,o,h,w,hull[i]));
         }
@@ -197,6 +199,46 @@ private:
                     }
                 }
             }
+            else if (_p[i].h==3 && _p[i].w==1 ||
+                     _p[i].h==1 && _p[i].w==3 ||
+                     _p[i].h==3 && _p[i].w==2 ||
+                     _p[i].h==2 && _p[i].w==3   )
+            {
+                std::string color=detectPartColor(_p[i]);
+
+                if      (_p[i].h==3 && _p[i].w==1 ||
+                         _p[i].h==1 && _p[i].w==3   )
+                {
+                    if      (color=="red")
+                    {
+                        label="D1"; // This can be either D1 or WC
+                    }
+                    else if (color=="green")
+                    {
+                        label="S1"; // This can be either S1 or S2
+                    }
+                    else if (color=="blue")
+                    {
+                        label="3";
+                    }
+                }
+                else if (_p[i].h==3 && _p[i].w==2 ||
+                         _p[i].h==2 && _p[i].w==3   )
+                {
+                    if (color=="red")
+                    {
+                        label="U2";
+                    }
+                    if (color=="green")
+                    {
+                        label="U3";
+                    }
+                }
+            }
+            else
+            {
+                ROS_WARN("[StateEstimator] Unexpected part on board!");
+            }
 
             if (label!="")
             {
@@ -208,6 +250,35 @@ private:
         }
     };
 
+    std::string detectPartColor(part _p)
+    {
+        cv::Mat mask    = cv::Mat::zeros(img_in.rows, img_in.cols, CV_8U);
+        cv::Mat img_lab = cv::Mat::zeros(img_in.rows, img_in.cols, CV_8UC3);
+        cv::cvtColor(img_in,img_lab, CV_BGR2HSV);
+        
+        vector<vector<cv::Point> > hull;
+        hull.push_back(_p.hull);
+        cv::drawContours(mask, hull, (int)0, cv::Scalar(255,255,255), CV_FILLED);
+
+        cv::Scalar avg = cv::mean(img_lab,mask);
+
+        if (avg[0]>=  0 && avg[0]< 70 || 
+            avg[0]>=160 && avg[0]<179   )
+        {
+            return "red";
+        }
+        else if (avg[0]>= 70 && avg[0]< 100)
+        {
+            return "green";
+        }
+        else if (avg[0]>= 100 && avg[0]< 130)
+        {
+            return "blue";
+        }
+
+        return "";
+    }
+
 public:
 
     /**
@@ -216,7 +287,7 @@ public:
      */
     void callback()
     {
-        cv::Mat img_in, img_out, img_bw;
+        cv::Mat img_out, img_bw;
         img_in  = cv::imread(filename.c_str(), CV_LOAD_IMAGE_COLOR);
         img_out = img_in.clone();
         cv::cvtColor(img_in,img_bw,CV_BGR2GRAY);
@@ -244,7 +315,7 @@ public:
         img_bw = filterByColor(img_in);
 
         // Find the parts and their convex hulls
-        vector<vector<cv::Point> > hull = findParts(img_bw,img_out);
+        vector<vector<cv::Point> > hull = findPartsHull(img_bw,img_out);
 
         // Detect some information on the parts based on their hulls
         std::vector<part> parts = detectParts(hull,pegs);
@@ -255,6 +326,8 @@ public:
 
         if (board.getNParts()>0)
         {
+            board.print();
+            
             snap_circuits::snap_circuits_board msg;
             msg.n_rows = snapCircuits::N_ROWS;
             msg.n_cols = snapCircuits::N_COLS;
