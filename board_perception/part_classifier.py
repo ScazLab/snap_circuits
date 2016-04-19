@@ -1,15 +1,15 @@
 import numpy as np
 
-N_ROWS = 6
-N_COLUMNS = 9
+N_ROWS = 7
+N_COLUMNS = 10
 
 # Board dimensions, in mm
 H_MARGIN = 13.5  # Margins from first peg to detected board border
 W_MARGIN = 14.
-H_CELL = 168. / N_ROWS  # Cell dimensions from board dimensions
-W_CELL = 251.5 / N_COLUMNS
-H = H_CELL * N_ROWS + 2 * H_MARGIN  # Total board dimensions
-W = W_CELL * N_COLUMNS + 2 * W_MARGIN
+H_CELL = 168. / (N_ROWS - 1)  # Cell dimensions from board dimensions
+W_CELL = 251.5 / (N_COLUMNS - 1)
+H = H_CELL * (N_ROWS - 1) + 2 * H_MARGIN  # Total board dimensions
+W = W_CELL * (N_COLUMNS - 1) + 2 * W_MARGIN
 
 ORIENTATIONS = {'NORTH': 0, 'EAST': 1, 'SOUTH': 2, 'WEST': 3}
 globals().update(ORIENTATIONS)  # Define NORTH, EAST, ... as global variables
@@ -88,17 +88,17 @@ class CellExtractor:
         i, j = self.image_coordinate(cell_coordinate(row, column))
         return self.img[i - self.dh:i + self.dh, j - self.dw:j + self.dw, :]
 
-    def all_cell_indices(self):
-        for row in range(N_ROWS):
-            for column in range(N_COLUMNS):
+    def all_peg_indices(self, last_row=True, last_column=True):
+        for row in range(N_ROWS - (not last_row)):
+            for column in range(N_COLUMNS - (not last_column)):
                 yield (row, column)
 
     def all_horizontal_cells(self):
-        for row, column in self.all_cell_indices():
+        for row, column in self.all_peg_indices(last_column=False):
             yield (row, column + .5, self.cell_image(row, column + .5))
 
     def all_vertical_cells(self):
-        for row, column in self.all_cell_indices():
+        for row, column in self.all_peg_indices(last_row=False):
             yield (row + .5, column, self.cell_image(row + .5, column))
 
 

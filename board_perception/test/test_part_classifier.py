@@ -2,11 +2,11 @@ from unittest import TestCase
 import numpy as np
 
 from board_perception.part_classifier import (
-    H_MARGIN, W_MARGIN, H_CELL, W_CELL,
+    H_MARGIN, W_MARGIN, H_CELL, W_CELL, N_ROWS, N_COLUMNS,
     NORTH, SOUTH, EAST, WEST, ROTATION, PART_TAG_LOCATION,
     cell_coordinate, rotate_tag_location, tag_location_from_part,
     inverse_orientation, part_reference_from_tag_location,
-    LabeledCellExtractor)
+    CellExtractor, LabeledCellExtractor)
 
 
 class DummyImage():
@@ -83,6 +83,24 @@ class TestRotations(TestCase):
                     loc)
 
 
+class TestCellExtractor(TestCase):
+
+    def setUp(self):
+        self.extr = CellExtractor()
+        self.extr.set_image(DummyImage())
+
+    def test_all_peg_indices_len(self):
+        self.assertEqual(len(list(self.extr.all_peg_indices())),
+                         N_ROWS * N_COLUMNS)
+        self.assertEqual(len(list(self.extr.all_peg_indices(False, False))),
+                         (N_ROWS - 1) * (N_COLUMNS - 1))
+        self.assertEqual(len(list(self.extr.all_peg_indices(last_row=False))),
+                         (N_ROWS - 1) * N_COLUMNS)
+        self.assertEqual(
+            len(list(self.extr.all_peg_indices(last_column=False))),
+            N_ROWS * (N_COLUMNS - 1))
+
+
 class TestLabeledCellExtractor(TestCase):
 
     def setUp(self):
@@ -99,6 +117,16 @@ class TestLabeledCellExtractor(TestCase):
                             "label": "u2",
                             "location": [4, 6, "east"]
                             },
+                           {  # Last columns
+                            "id": 10,
+                            "label": "5",
+                            "location": [5, 9, "north"]
+                            },
+                           {  # Last row
+                            "id": 5,
+                            "label": "s1",
+                            "location": [6, 3, "west"]
+                            },
                            ]}
         img = DummyImage()
         self.extr = LabeledCellExtractor(img, board)
@@ -106,23 +134,29 @@ class TestLabeledCellExtractor(TestCase):
     def test_set_labels(self):
         labels = {(1, 2.5): ("4", WEST),
                   (2.5, 1): ("2", NORTH),
-                  (4.5, 7): ("u2", EAST)}
+                  (4.5, 7): ("u2", EAST),
+                  (3.5, 9): ("5", NORTH),
+                  (6, 1.5): ("s1", WEST)}
         self.assertEqual(labels, self.extr.labels)
 
     def test_labeled_cells(self):
         v, h = self.extr.labeled_cells()
-        self.assertEqual(9 * 6, len(h))
-        self.assertEqual(9 * 6, len(v))
+        self.assertEqual(9 * 7, len(h))
+        self.assertEqual(10 * 6, len(v))
         non_empty_h = [(l, o, c) for ((l, o), c) in h if l is not None]
         non_empty_v = [(l, o, c) for ((l, o), c) in v if l is not None]
-        self.assertEqual([("4", WEST)], [(l, o) for (l, o, c) in non_empty_h])
-        self.assertEqual([("2", NORTH), ("u2", EAST)],
-                         [(l, o) for (l, o, c) in non_empty_v])
+        self.assertEqual(set([("4", WEST), ("s1", WEST)]),
+                         set([(l, o) for (l, o, c) in non_empty_h]))
+        self.assertEqual(set([("2", NORTH), ("u2", EAST), ("5", NORTH)]),
+                         set([(l, o) for (l, o, c) in non_empty_v]))
         # This is only a non-regression test from a known correct state
-        self.assertEqual([(106, 148, 111, 129)],
-                         [c for (l, o, c) in non_empty_h])
-        self.assertEqual([(235, 277, 51, 69), (408, 450, 290, 308)],
-                         [c for (l, o, c) in non_empty_v])
+        self.assertEqual(set([("4", (106, 148, 111, 129)),
+                              ("s1", (537, 579, 71, 89))]),
+                         set([(l, c) for (l, o, c) in non_empty_h]))
+        self.assertEqual(set([("2", (235, 277, 51, 69)),
+                              ("u2", (408, 450, 290, 308)),
+                              ("5", (322, 364, 370, 388))]),
+                         set([(l, c) for (l, o, c) in non_empty_v]))
 
 
 def visual_test():
