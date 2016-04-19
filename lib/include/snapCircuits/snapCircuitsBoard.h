@@ -33,7 +33,7 @@ private:
 
     std::vector<snapCircuitsPart> parts;  // vector of parts (i.e. the complete board state)
 
-    unsigned int current_id; // the ID to assign to the next part that is going to be added
+    unsigned int cur_id; // the ID to assign to the next part that is going to be added
 
     NSVGimage*  svg_image; // the global svg image with the board and the parts
 
@@ -41,6 +41,18 @@ public:
     /* CONSTRUCTORS */
     snapCircuitsBoard();
     snapCircuitsBoard(int _n_rows, int _n_cols);
+
+    /**
+    * Standard Copy Operator
+    **/
+    snapCircuitsBoard &operator=(const snapCircuitsBoard &_sb);
+
+    /**
+     * Copy operator overloaded with the corresponding ros message.
+     * It populates the snapCircuitsBoard from a ros msg.
+     * @param  _sb the ros message
+     */
+    snapCircuitsBoard &operator=(const snap_circuits::snap_circuits_board &_sb);
 
     /**
      * isEqual Operator
@@ -51,7 +63,7 @@ public:
      * Converts the snapCircuitsBoard to the ros msg
      * @return the ros message relative to the snapCircuitsBoard
      */
-    snap_circuits::snap_circuits_board toMsg();    
+    snap_circuits::snap_circuits_board toMsg();
 
     /**
      * Adds a snapCircuitsPart to the board. Its location will be automatically

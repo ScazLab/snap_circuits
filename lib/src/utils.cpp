@@ -51,6 +51,15 @@ snapLocation::snapLocation(int _x, int _y, int _o, int _x_max, int _y_max)
     }
 };
 
+snapLocation::snapLocation(const snap_circuits::snap_location &_sl)
+{
+    setXYMax(N_ROWS,N_COLS);
+    if (!setXYO(_sl.x,_sl.y,_sl.o))
+    {
+        resetLocation();
+    }
+}
+
 snapLocation & snapLocation::operator=(const snapLocation &_l)
 {
     x = _l.x;
@@ -77,6 +86,15 @@ snap_circuits::snap_location snapLocation::toMsg()
     loc_msg.o = o;
 
     return loc_msg;
+}
+
+snapLocation & snapLocation::operator=(const snap_circuits::snap_location &_sl)
+{
+    x = _sl.x;
+    y = _sl.y;
+    o = _sl.o;
+
+    return *this;
 }
 
 void snapLocation::resetLocation()

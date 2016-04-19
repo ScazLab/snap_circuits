@@ -52,11 +52,20 @@ public:
     snapLocation(int _x_max, int _y_max);
     snapLocation(int _x, int _y, int _o);
     snapLocation(int _x, int _y, int _o, int _x_max, int _y_max);
+    snapLocation(const snap_circuits::snap_location &_sl);
 
     /**
-    * Copy Operator
+     * Standard Copy Operator
+     * @param  _l the snapLocation to copy from
     **/
     snapLocation &operator=(const snapLocation &_l);
+
+    /**
+     * Copy operator overloaded with the corresponding ros message.
+     * It populates the snapLocation from a ros msg.
+     * @param  _sl the ros message
+     */
+    snapLocation &operator=(const snap_circuits::snap_location &_sl);
 
     /**
      * isEqual Operator

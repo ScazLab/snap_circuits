@@ -17,10 +17,39 @@ snapCircuitsBoard::snapCircuitsBoard(int _n_rows, int _n_cols)
     reset();
 }
 
+snapCircuitsBoard & snapCircuitsBoard::operator=(const snapCircuitsBoard &_sb)
+{
+    reset();
+
+    n_rows = _sb.n_rows;
+    n_cols = _sb.n_cols;
+    cur_id = _sb.cur_id;
+    parts  =  _sb.parts;
+
+    return *this;
+}
+
+snapCircuitsBoard & snapCircuitsBoard::operator=(const snap_circuits::snap_circuits_board &_sb)
+{
+    reset();
+
+    n_rows = _sb.n_rows;
+    n_cols = _sb.n_cols;
+    cur_id = _sb.cur_id;
+
+    for (int i = 0; i < _sb.parts.size(); ++i)
+    {
+        snap_circuits::snap_circuits_part sp = _sb.parts[i];
+        parts.push_back(snapCircuitsPart(sp));
+    }
+
+    return *this;   
+}
+
 bool snapCircuitsBoard::operator==(const snapCircuitsBoard &_b)
 {
     bool res = n_rows==_b.n_rows && n_cols==_b.n_cols &&
-               current_id==_b.current_id &&
+               cur_id==_b.cur_id &&
                parts.size()==_b.parts.size();
 
     if (res==false) return false;
@@ -37,9 +66,9 @@ snap_circuits::snap_circuits_board snapCircuitsBoard::toMsg()
 {
     snap_circuits::snap_circuits_board board_msg;
 
-    board_msg.n_rows     = n_rows;
-    board_msg.n_cols     = n_cols;
-    board_msg.current_id = current_id;
+    board_msg.n_rows = n_rows;
+    board_msg.n_cols = n_cols;
+    board_msg.cur_id = cur_id;
 
     for (int i = 0; i < parts.size(); ++i)
     {
@@ -52,8 +81,8 @@ snap_circuits::snap_circuits_board snapCircuitsBoard::toMsg()
 bool snapCircuitsBoard::addPart(snapCircuitsPart _p)
 {
     _p.setXYMax(n_rows,n_cols);   // set the board dimension
-    _p.setID(current_id);         // set the ID to the part
-    current_id++;                 // increment that ID
+    _p.setID(cur_id);         // set the ID to the part
+    cur_id++;                 // increment that ID
 
     parts.push_back(_p);          // add the part to the board
 
@@ -102,7 +131,7 @@ bool snapCircuitsBoard::createSVGimage()
 void snapCircuitsBoard::print(int verbosity)
 {
     ROS_INFO("*****************************");
-    ROS_INFO("BOARD: n_rows: %i \t n_cols %i \t current_id %i",n_rows,n_cols,current_id);
+    ROS_INFO("BOARD: n_rows: %i \t n_cols %i \t current_id %i",n_rows,n_cols,cur_id);
     for (int i = 0; i < parts.size(); ++i)
     {
         ROS_INFO("Part #%i:\t%s",i,parts[i].toString(verbosity).c_str());
@@ -112,7 +141,7 @@ void snapCircuitsBoard::print(int verbosity)
 
 bool snapCircuitsBoard::reset()
 {
-    current_id = 0;
+    cur_id = 0;
     parts.clear();
     addPart(snapCircuitsPart("BG")); // The base grid is always the first element
 

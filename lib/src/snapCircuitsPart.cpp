@@ -18,6 +18,12 @@ snapCircuitsPart::snapCircuitsPart(std::string _label, snapLocation _location) :
     init();
 }
 
+snapCircuitsPart::snapCircuitsPart(snap_circuits::snap_circuits_part &_sp) :
+                                   label(_sp.label), location(_sp.loc), ID(-1)
+{
+    init();
+}
+
 void snapCircuitsPart::init()
 {
     svg_image=NULL;
@@ -34,6 +40,17 @@ snapCircuitsPart & snapCircuitsPart::operator=(const snapCircuitsPart &_p)
     label    = _p.label;
     svg_file = _p.svg_file;
     location = _p.location;
+
+    return *this;
+}
+
+snapCircuitsPart & snapCircuitsPart::operator=(const snap_circuits::snap_circuits_part &_sp)
+{
+    ID       = _sp.ID;
+    label    = _sp.label;
+    getNamefromLabel();
+    getImageFilefromLabel();
+    location = _sp.loc;
 
     return *this;
 }

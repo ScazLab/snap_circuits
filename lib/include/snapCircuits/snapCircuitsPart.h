@@ -41,6 +41,7 @@ public:
     /* CONSTRUCTORS */
     snapCircuitsPart(std::string _label);
     snapCircuitsPart(std::string _label, snapCircuits::snapLocation _location);
+    snapCircuitsPart(snap_circuits::snap_circuits_part &_sp);
 
     /**
      * Initialization method (used in the constructors because overload of the 
@@ -50,9 +51,16 @@ public:
     void init();
 
     /**
-    * Copy Operator
+    * Standard Copy Operator
     **/
     snapCircuitsPart &operator=(const snapCircuitsPart &_p);
+
+    /**
+     * Copy operator overloaded with the corresponding ros message.
+     * It populates the snapCircuitsPart from a ros msg.
+     * @param  _sp the ros message
+     */
+    snapCircuitsPart &operator=(const snap_circuits::snap_circuits_part &_sp);
 
     /**
      * isEqual Operator
