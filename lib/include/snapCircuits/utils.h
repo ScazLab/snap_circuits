@@ -57,6 +57,11 @@ public:
     snapLocation &operator=(const snapLocation &_l);
 
     /**
+     * isEqual Operator
+     */
+    bool operator==(const snapLocation &_l);
+
+    /**
      * Resets the location to its original state
      */
     void resetLocation();

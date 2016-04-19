@@ -326,7 +326,7 @@ public:
 
         if (board.getNParts()>0)
         {
-            board.print();
+            board.print(1);
             
             snap_circuits::snap_circuits_board msg;
             msg.n_rows = snapCircuits::N_ROWS;

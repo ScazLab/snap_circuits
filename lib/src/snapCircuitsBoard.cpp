@@ -17,6 +17,22 @@ snapCircuitsBoard::snapCircuitsBoard(int _n_rows, int _n_cols)
     reset();
 }
 
+bool snapCircuitsBoard::operator==(const snapCircuitsBoard &_b)
+{
+    bool res = n_rows==_b.n_rows && n_cols==_b.n_cols &&
+               current_id==_b.current_id &&
+               parts.size()==_b.parts.size();
+
+    if (res==false) return false;
+
+    for (int i = 0; i < parts.size(); ++i)
+    {
+        res = res && parts[i]==_b.parts[i];
+    }
+    
+    return res;
+}
+
 bool snapCircuitsBoard::addPart(snapCircuitsPart _p)
 {
     _p.setXYMax(n_rows,n_cols);   // set the board dimension

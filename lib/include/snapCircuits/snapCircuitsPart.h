@@ -53,6 +53,14 @@ public:
     snapCircuitsPart &operator=(const snapCircuitsPart &_p);
 
     /**
+     * isEqual Operator
+     * This function compares only labels and their positions. Importantly,
+     * it does not check against IDs because they do not strictly responsibility
+     * of the snapCircuitsPart but rather the board.
+     */
+    bool operator==(const snapCircuitsPart &_p);
+
+    /**
      * Retrieves the name of the part from its label.
      * Originally, it was elegantly implemented as a std::map<std::string, std::tuple>, but
      * that would have required C++11 and I decided to drop it.

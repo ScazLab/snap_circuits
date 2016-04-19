@@ -63,6 +63,12 @@ snapLocation & snapLocation::operator=(const snapLocation &_l)
     return *this;
 }
 
+bool snapLocation::operator==(const snapLocation &_l)
+{
+    return x==_l.x && y==_l.y && o==_l.o &&
+           x_max==_l.x_max && y_max==_l.y_max;
+}
+
 void snapLocation::resetLocation()
 {
     x = -1;

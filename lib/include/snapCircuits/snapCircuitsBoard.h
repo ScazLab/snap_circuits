@@ -41,6 +41,11 @@ public:
     snapCircuitsBoard(int _n_rows, int _n_cols);
 
     /**
+     * isEqual Operator
+     */
+    bool operator==(const snapCircuitsBoard &_b);
+
+    /**
      * Adds a snapCircuitsPart to the board. Its location will be automatically
      * calibrated to the size of the board, whereas its ID will be incrementally assigned
      * @param  _p the part to add

@@ -38,6 +38,11 @@ snapCircuitsPart & snapCircuitsPart::operator=(const snapCircuitsPart &_p)
     return *this;
 }
 
+bool snapCircuitsPart::operator==(const snapCircuitsPart &_p)
+{
+    return name==_p.name && location==_p.location;
+}
+
 bool snapCircuitsPart::getNamefromLabel()
 {
     if      (label=="BG")    { name="Base Grid"; }
