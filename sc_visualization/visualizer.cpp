@@ -26,12 +26,13 @@ private:
     void boardCallback(const snap_circuits::snap_circuits_board::ConstPtr& msg)
     {
         board.reset();
-        board.set_n_rows_and_cols(msg->n_rows,msg->n_cols);
+        board=*msg;
+        // board.set_n_rows_and_cols(msg->n_rows,msg->n_cols);
 
-        for (int i = 0; i < msg->parts.size(); ++i)
-        {
-            board.addPart(partFromMessage(msg->parts[i],msg->n_rows,msg->n_cols));
-        }
+        // for (int i = 0; i < msg->parts.size(); ++i)
+        // {
+        //     board.addPart(partFromMessage(msg->parts[i],msg->n_rows,msg->n_cols));
+        // }
     };
 
     snapCircuitsPart partFromMessage(snap_circuits::snap_circuits_part msg,
