@@ -71,7 +71,7 @@ public:
      * @param  _p the part to add
      * @return    true/false if success/failure
      */
-    bool addPart(snapCircuitsPart _p);
+    bool addPart(const snapCircuitsPart & _p);
 
     /**
      * Removes a snapCircuitsPart given its ID. The other parts will be not affected

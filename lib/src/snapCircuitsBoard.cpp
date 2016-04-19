@@ -7,24 +7,24 @@ using namespace snapCircuits;
 
 snapCircuitsBoard::snapCircuitsBoard()
 {
-    set_n_rows_and_cols(N_ROWS,N_COLS);
     reset();
+    set_n_rows_and_cols(N_ROWS,N_COLS);
 }
 
 snapCircuitsBoard::snapCircuitsBoard(int _n_rows, int _n_cols)
 {
-    set_n_rows_and_cols(_n_rows,_n_cols);
     reset();
+    set_n_rows_and_cols(_n_rows,_n_cols);
 }
 
 snapCircuitsBoard & snapCircuitsBoard::operator=(const snapCircuitsBoard &_sb)
 {
     reset();
 
-    n_rows = _sb.n_rows;
-    n_cols = _sb.n_cols;
     cur_id = _sb.cur_id;
     parts  =  _sb.parts;
+
+    set_n_rows_and_cols(_sb.n_rows,_sb.n_cols);
 
     return *this;
 }
@@ -33,8 +33,6 @@ snapCircuitsBoard & snapCircuitsBoard::operator=(const snap_circuits::snap_circu
 {
     reset();
 
-    n_rows = _sb.n_rows;
-    n_cols = _sb.n_cols;
     cur_id = _sb.cur_id;
 
     for (int i = 0; i < _sb.parts.size(); ++i)
@@ -42,6 +40,8 @@ snapCircuitsBoard & snapCircuitsBoard::operator=(const snap_circuits::snap_circu
         snap_circuits::snap_circuits_part sp = _sb.parts[i];
         parts.push_back(snapCircuitsPart(sp));
     }
+
+    set_n_rows_and_cols(_sb.n_rows,_sb.n_cols);
 
     return *this;   
 }
@@ -78,13 +78,14 @@ snap_circuits::snap_circuits_board snapCircuitsBoard::toMsg()
     return board_msg;
 }
 
-bool snapCircuitsBoard::addPart(snapCircuitsPart _p)
+bool snapCircuitsBoard::addPart(const snapCircuitsPart &_p)
 {
-    _p.setXYMax(n_rows,n_cols);   // set the board dimension
-    _p.setID(cur_id);         // set the ID to the part
+    snapCircuitsPart p=_p;
+    p.setXYMax(n_rows,n_cols);   // set the board dimension
+    p.setID(cur_id);         // set the ID to the part
     cur_id++;                 // increment that ID
 
-    parts.push_back(_p);          // add the part to the board
+    parts.push_back(p);          // add the part to the board
 
     return true;
 }
@@ -158,7 +159,14 @@ bool snapCircuitsBoard::reset()
 
 bool snapCircuitsBoard::set_n_rows_and_cols(const int &_r, const int &_c)
 {
-    return set_n_rows(_r) && set_n_cols(_c);
+    set_n_rows(_r);
+    set_n_cols(_c);
+
+    for (int i = 0; i < parts.size(); ++i)
+    {
+        parts[i].setXYMax(_r,_c);
+    }
+    return true;
 }
 
 snapCircuitsBoard::~snapCircuitsBoard()
