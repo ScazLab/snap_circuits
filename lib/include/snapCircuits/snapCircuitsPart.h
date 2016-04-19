@@ -19,6 +19,8 @@
 #include <string>
 #include "snapCircuits/utils.h"
 
+#include <snap_circuits/snap_circuits_part.h> 
+
 namespace snapCircuits {
 
 class snapCircuitsPart
@@ -59,6 +61,12 @@ public:
      * of the snapCircuitsPart but rather the board.
      */
     bool operator==(const snapCircuitsPart &_p);
+
+    /**
+     * Converts the snapCircuitsPart to the ros msg
+     * @return the ros message relative to the snapCircuitsPart
+     */
+    snap_circuits::snap_circuits_part toMsg();
 
     /**
      * Retrieves the name of the part from its label.

@@ -327,30 +327,7 @@ public:
         if (board.getNParts()>0)
         {
             board.print(1);
-            
-            snap_circuits::snap_circuits_board msg;
-            msg.n_rows = snapCircuits::N_ROWS;
-            msg.n_cols = snapCircuits::N_COLS;
-
-            for (int i = 0; i < board.getNParts()+1; ++i)
-            {
-                snapCircuitsPart *part = board.getPart(i);
-
-                snap_circuits::snap_circuits_part prt_msg;
-                prt_msg.ID    = part->getID();
-                prt_msg.label = part->getLabel();
-
-                snap_circuits::snap_location loc_msg;
-                loc_msg.x = part->getLocation().getX();
-                loc_msg.y = part->getLocation().getY();
-                loc_msg.o = part->getLocation().getO();
-
-                prt_msg.loc = loc_msg;
-
-                msg.parts.push_back(prt_msg);
-            }
-
-            boardStatePublisher.publish(msg);
+            boardStatePublisher.publish(board.toMsg());
         }
 
         if (doShow)

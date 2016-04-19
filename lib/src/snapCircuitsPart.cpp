@@ -40,7 +40,17 @@ snapCircuitsPart & snapCircuitsPart::operator=(const snapCircuitsPart &_p)
 
 bool snapCircuitsPart::operator==(const snapCircuitsPart &_p)
 {
-    return name==_p.name && location==_p.location;
+    return label==_p.label && location==_p.location;
+}
+
+snap_circuits::snap_circuits_part snapCircuitsPart::toMsg()
+{
+    snap_circuits::snap_circuits_part prt_msg;
+    prt_msg.ID    = ID;
+    prt_msg.label = label;
+    prt_msg.loc   = location.toMsg();
+
+    return prt_msg;
 }
 
 bool snapCircuitsPart::getNamefromLabel()
@@ -58,11 +68,11 @@ bool snapCircuitsPart::getNamefromLabel()
     else if (label=="RP")    { name="Photoresistor"; }
     else if (label=="D1")    { name="Red LED"; }
     else if (label=="L1")    { name="2.5V Lamp"; }
-    else if (label=="B1")    { name="Battery - 2x1.5V AA"; }
+    else if (label=="B1")    { name="Battery"; }
     else if (label=="SP")    { name="Speaker"; }
-    else if (label=="U1")    { name="Music Integrated Circuit"; }
-    else if (label=="U2")    { name="Alarm Integrated Circuit"; }
-    else if (label=="U3")    { name="Space War Integrated Circuit"; }
+    else if (label=="U1")    { name="Music IC"; }
+    else if (label=="U2")    { name="Alarm IC"; }
+    else if (label=="U3")    { name="Space War IC"; }
     else if (label=="M1")    { name="Motor Fan"; }
     else if (label=="R1")    { name="100 Ohm Resistor"; }
     else {

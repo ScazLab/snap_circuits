@@ -27,6 +27,8 @@
 #include "nanosvg/nanosvg.h"
 #include "nanosvg/nanosvgrast.h"
 
+#include <snap_circuits/snap_location.h> 
+
 namespace snapCircuits {
 
 const int N_ROWS=10;    // Number of rows on the board
@@ -60,6 +62,12 @@ public:
      * isEqual Operator
      */
     bool operator==(const snapLocation &_l);
+
+    /**
+     * Converts the snapLocation to the ros msg
+     * @return the ros message relative to the snapLocation
+     */
+    snap_circuits::snap_location toMsg();
 
     /**
      * Resets the location to its original state

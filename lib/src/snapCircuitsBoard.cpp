@@ -33,6 +33,22 @@ bool snapCircuitsBoard::operator==(const snapCircuitsBoard &_b)
     return res;
 }
 
+snap_circuits::snap_circuits_board snapCircuitsBoard::toMsg()
+{
+    snap_circuits::snap_circuits_board board_msg;
+
+    board_msg.n_rows     = n_rows;
+    board_msg.n_cols     = n_cols;
+    board_msg.current_id = current_id;
+
+    for (int i = 0; i < parts.size(); ++i)
+    {
+        board_msg.parts.push_back(parts[i].toMsg());
+    }
+
+    return board_msg;
+}
+
 bool snapCircuitsBoard::addPart(snapCircuitsPart _p)
 {
     _p.setXYMax(n_rows,n_cols);   // set the board dimension

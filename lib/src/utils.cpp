@@ -69,6 +69,16 @@ bool snapLocation::operator==(const snapLocation &_l)
            x_max==_l.x_max && y_max==_l.y_max;
 }
 
+snap_circuits::snap_location snapLocation::toMsg()
+{
+    snap_circuits::snap_location loc_msg;
+    loc_msg.x = x;
+    loc_msg.y = y;
+    loc_msg.o = o;
+
+    return loc_msg;
+}
+
 void snapLocation::resetLocation()
 {
     x = -1;

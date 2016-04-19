@@ -48,6 +48,12 @@ public:
     bool operator==(const snapCircuitsBoard &_b);
 
     /**
+     * Converts the snapCircuitsBoard to the ros msg
+     * @return the ros message relative to the snapCircuitsBoard
+     */
+    snap_circuits::snap_circuits_board toMsg();    
+
+    /**
      * Adds a snapCircuitsPart to the board. Its location will be automatically
      * calibrated to the size of the board, whereas its ID will be incrementally assigned
      * @param  _p the part to add
