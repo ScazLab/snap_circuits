@@ -61,7 +61,6 @@ private:
     std::string name;
     std::string  sub;
     std::string  pub;
-    std::string filename;
 
     ros::NodeHandle nodeHandle;
 
@@ -279,24 +278,29 @@ private:
         return "";
     }
 
-public:
-
     /**
      * Callback on the subscriber's topic. For now it opens a jpg file
      * @param msgIn an RGB image
      */
-    void callback()
+    void callback(const sensor_msgs::ImageConstPtr& msgIn)
     {
-        cv::Mat img_out, img_bw;
-        img_in  = cv::imread(filename.c_str(), CV_LOAD_IMAGE_COLOR);
-        img_out = img_in.clone();
-        cv::cvtColor(img_in,img_bw,CV_BGR2GRAY);
-
-        if(!img_in.data)                              // Check for invalid input
+        // Let's convert the ROS image to OpenCV image format
+        cv_bridge::CvImageConstPtr cv_ptr;
+        try
         {
-            ROS_ERROR("Could not open or find the image");
+            cv_ptr = cv_bridge::toCvShare(msgIn, sensor_msgs::image_encodings::BGR8);
+        }
+        catch (cv_bridge::Exception& e)
+        {
+            ROS_ERROR("cv_bridge exception: %s", e.what());
             return;
         }
+
+        // Convert the image to black and white
+        img_in = cv_ptr->image.clone();
+        cv::Mat img_out = img_in.clone();
+        cv::Mat img_bw;
+        cv::cvtColor(img_in,img_bw,CV_BGR2GRAY);
 
         // Build an array of pegs for later use
         std::vector<cv::Point> pegs;
@@ -356,17 +360,17 @@ public:
     /**
      * Constructor
      */
-    StateEstimator(string _name, string _filename) : rng(ros::Time::now().toSec()), name(_name), filename(_filename), imageTransport(nodeHandle)
+    StateEstimator(string _name) : rng(ros::Time::now().toSec()),
+                                   name(_name), imageTransport(nodeHandle)
     {
         nodeHandle.param(("/"+name+"/show").c_str(), doShow, true);
         nodeHandle.param<std::string>(("/"+name+"/sub").c_str(), sub, "/snap_circuits/image_undistorted");
         nodeHandle.param<std::string>(("/"+name+"/pub").c_str(), pub, "/snap_circuits/board_state");
 
-        // imageSubscriber = imageTransport.subscribe(sub.c_str(),1,&StateEstimator::callback, this);
+        imageSubscriber      = imageTransport.subscribe(sub.c_str(),1,&StateEstimator::callback, this);
         boardStatePublisher  = nodeHandle.advertise<snap_circuits::snap_circuits_board>(pub,1);
 
         ROS_INFO("[StateEstimator] Name       set to %s", name.c_str());
-        ROS_INFO("[StateEstimator] Filename   set to %s", filename.c_str());
         ROS_INFO("[StateEstimator] Show param set to %i", doShow);
         ROS_INFO("[StateEstimator] Subscribing    to %s", sub.c_str());
         ROS_INFO("[StateEstimator] Publishing     to %s", pub.c_str());
@@ -402,7 +406,6 @@ public:
 int main(int argc, char** argv)
 {
     std::string name="state_estimator";
-    std::string filename="/home/alecive/code/catkin_my_ws/src/snap_circuits/frame0005.jpg";
 
     ros::init(argc, argv, name.c_str());
     std::string sub = "/snap_circuits/image_undistorted";
@@ -434,10 +437,8 @@ int main(int argc, char** argv)
         }
     }
 
-    StateEstimator state_estimator(name,filename);
-    // ros::spin();
-
-    state_estimator.callback();
+    StateEstimator state_estimator(name);
+    ros::spin();
 
     return 0;
 }
