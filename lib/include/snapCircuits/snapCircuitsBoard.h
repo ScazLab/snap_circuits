@@ -32,6 +32,7 @@ private:
     int n_cols;     // number of cols in the board
 
     std::vector<snapCircuitsPart> parts;  // vector of parts (i.e. the complete board state)
+    std::vector<int>                IDs;  // vector of IDs (to recover board state history)
 
     unsigned int cur_id; // the ID to assign to the next part that is going to be added
 
@@ -100,15 +101,20 @@ public:
     bool reset();
 
     /* GETTERS */
-    NSVGimage* getImage()                    { return svg_image; };
-    std::vector<snapCircuitsPart> getParts() { return parts; };
-    snapCircuitsPart* getPart(int i)         { return &(parts[i]); };
-    int getNParts()                          { return parts.size()-1; }; // The first item is the board.
+    NSVGimage* getImage()                     { return svg_image; };
+    std::vector<int> getIDs()                 { return IDs; };
+    int getID(int i)                          { return IDs[i]; };
+    std::vector<snapCircuitsPart> getParts()  { return parts; };
+    snapCircuitsPart* getPart(int i)          { return &(parts[i]); };
+    int getNParts()                           { return parts.size()-1; }; // The first item is the board.
 
     /* SETTERS */
-    bool set_n_rows(const int &_r) { n_rows=_r; return true; };
-    bool set_n_cols(const int &_c) { n_cols=_c; return true; };
+    bool set_n_rows(const int &_r)            { n_rows=_r; return true; };
+    bool set_n_cols(const int &_c)            { n_cols=_c; return true; };
     bool set_n_rows_and_cols(const int &_r, const int &_c);
+
+    bool setID(const int &_i, const int &_ID) { IDs[_i] = _ID; return true; };
+    bool setIDs(const std::vector<int> _IDs)  { IDs = _IDs; return true; }; 
 
     /* DESTRUCTOR */
     ~snapCircuitsBoard();

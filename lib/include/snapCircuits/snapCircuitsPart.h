@@ -26,8 +26,6 @@ namespace snapCircuits {
 class snapCircuitsPart
 {
 private:
-    int ID;             // Order of appearance on the board
-
     std::string  name;  // Name as stored in the snapCircuits documentation
     std::string label;  // Label as written on the physical part.It is also the
                         // Filename of the svg image corresponding to the part
@@ -42,6 +40,7 @@ public:
     snapCircuitsPart(std::string _label);
     snapCircuitsPart(std::string _label, snapCircuits::snapLocation _location);
     snapCircuitsPart(snap_circuits::snap_circuits_part &_sp);
+    snapCircuitsPart(snap_circuits::snap_circuits_part &_sp, int _x_max, int _y_max);
 
     /**
      * Initialization method (used in the constructors because overload of the 
@@ -64,9 +63,7 @@ public:
 
     /**
      * isEqual Operator
-     * This function compares only labels and their positions. Importantly,
-     * it does not check against IDs because they do not strictly responsibility
-     * of the snapCircuitsPart but rather the board.
+     * This function compares only labels and their positions.
      */
     bool operator==(const snapCircuitsPart &_p);
 
@@ -111,7 +108,6 @@ public:
     std::string toString(int verbosity=0);
 
     /* SETTERS */
-    bool setID(const int &_ID) { ID=_ID; return true; };
     bool setImage(NSVGimage* _image);
 
     bool setXYMax(const int &_x_max, const int &_y_max);
@@ -119,7 +115,6 @@ public:
 
     /* GETTERS */
     NSVGimage* getImage()       { return svg_image; };
-    int getID()                 { return ID;        };
     std::string getName()       { return name;      };
     std::string getLabel()      { return label;     };
     std::string getSVGfile()    { return svg_file;  };

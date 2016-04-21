@@ -7,21 +7,29 @@
 using namespace std;
 using namespace snapCircuits;
 
-snapCircuitsPart::snapCircuitsPart(string _label) : label(_label), ID(-1)
+snapCircuitsPart::snapCircuitsPart(string _label) : label(_label)
 {
     init();
 }
 
 snapCircuitsPart::snapCircuitsPart(std::string _label, snapLocation _location) :
-                                   label(_label), location(_location), ID(-1)
+                                   label(_label), location(_location)
 {
     init();
 }
 
 snapCircuitsPart::snapCircuitsPart(snap_circuits::snap_circuits_part &_sp) :
-                                   label(_sp.label), location(_sp.loc), ID(_sp.ID)
+                                   label(_sp.label), location(_sp.loc)
 {
     init();
+}
+
+snapCircuitsPart::snapCircuitsPart(snap_circuits::snap_circuits_part &_sp,
+                                   int _x_max, int _y_max) :
+                                   label(_sp.label), location(_sp.loc)
+{
+    init();
+    setXYMax(_x_max,_y_max);
 }
 
 void snapCircuitsPart::init()
@@ -35,7 +43,6 @@ void snapCircuitsPart::init()
 snapCircuitsPart & snapCircuitsPart::operator=(const snapCircuitsPart &_p)
 {
     // We don't want to pass the pointer to the NSVGimage, we can create it on the fly
-    ID       = _p.ID;
     name     = _p.name;
     label    = _p.label;
     svg_file = _p.svg_file;
@@ -46,7 +53,6 @@ snapCircuitsPart & snapCircuitsPart::operator=(const snapCircuitsPart &_p)
 
 snapCircuitsPart & snapCircuitsPart::operator=(const snap_circuits::snap_circuits_part &_sp)
 {
-    ID       = _sp.ID;
     label    = _sp.label;
     getNamefromLabel();
     getImageFilefromLabel();
@@ -63,7 +69,6 @@ bool snapCircuitsPart::operator==(const snapCircuitsPart &_p)
 snap_circuits::snap_circuits_part snapCircuitsPart::toMsg()
 {
     snap_circuits::snap_circuits_part prt_msg;
-    prt_msg.ID    = ID;
     prt_msg.label = label;
     prt_msg.loc   = location.toMsg();
 
@@ -106,7 +111,7 @@ bool snapCircuitsPart::getImageFilefromLabel()
 
     if (ros::param::get("snap_circuits/svg_folder", svg_folder))
     {
-        ROS_INFO("[snapCircuitsPart::getImageFilefromLabel] svg folder: %s",svg_folder.c_str());
+        ROS_DEBUG("[snapCircuitsPart::getImageFilefromLabel] svg folder: %s",svg_folder.c_str());
 
         if (dirExists(svg_folder.c_str()))
         {
@@ -146,7 +151,7 @@ std::string snapCircuitsPart::toString(int verbosity)
 {
     std::stringstream res;
 
-    res << "ID: " << ID << "\t label: "  << label;
+    res << "label: "  << label;
     if (verbosity>0)
     {
         res << "\t name: " << name;

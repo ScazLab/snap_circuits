@@ -17,6 +17,25 @@ snapCircuitsBoard::snapCircuitsBoard(int _n_rows, int _n_cols)
     reset();
 }
 
+bool snapCircuitsBoard::reset()
+{
+    cur_id = 0;
+    parts.clear();
+    IDs.clear();
+    addPart(snapCircuitsPart("BG")); // The base grid is always the first element
+    parts[0].setXYMax(n_rows,n_cols);
+
+    svg_image = (NSVGimage*)malloc(sizeof(NSVGimage));
+    if (svg_image == NULL) 
+    {
+        free(svg_image);
+        return false;
+    }
+    memset(svg_image, 0, sizeof(NSVGimage));
+
+    return true;
+}
+
 snapCircuitsBoard & snapCircuitsBoard::operator=(const snapCircuitsBoard &_sb)
 {
     set_n_rows_and_cols(_sb.n_rows,_sb.n_cols);
@@ -37,10 +56,13 @@ snapCircuitsBoard & snapCircuitsBoard::operator=(const snap_circuits::snap_circu
     for (int i = 1; i < _sb.parts.size(); ++i)
     {
         snap_circuits::snap_circuits_part sp = _sb.parts[i];
-        addPart(snapCircuitsPart(sp));
+        addPart(snapCircuitsPart(sp,n_rows,n_cols));
+        IDs[i]=_sb.IDs[i];
     }
 
-    return *this;   
+    cur_id = _sb.cur_id;
+
+    return *this;
 }
 
 bool snapCircuitsBoard::operator==(const snapCircuitsBoard &_b)
@@ -70,6 +92,7 @@ snap_circuits::snap_circuits_board snapCircuitsBoard::toMsg()
     for (int i = 0; i < parts.size(); ++i)
     {
         board_msg.parts.push_back(parts[i].toMsg());
+        board_msg.IDs.push_back(IDs[i]);
     }
 
     return board_msg;
@@ -79,23 +102,23 @@ bool snapCircuitsBoard::addPart(const snapCircuitsPart &_p)
 {
     snapCircuitsPart p=_p;
     p.setXYMax(n_rows,n_cols);   // set the board dimension
-    p.setID(cur_id);         // set the ID to the part
-    cur_id++;                 // increment that ID
 
+    IDs.push_back(cur_id);
     parts.push_back(p);          // add the part to the board
+
+    cur_id++;                    // increment that ID
 
     return true;
 }
 
 bool snapCircuitsBoard::removePart(const int &_ID)
 {
-    std::vector<snapCircuitsPart>::iterator it;
-
-    for (it = parts.begin(); it != parts.end(); ++it)
+    for (int i = 0; i < IDs.size(); ++i)
     {
-        if (it->getID()==_ID)
+        if (IDs[i]==_ID)
         {
-            parts.erase(it);
+            parts.erase(parts.begin()+i);
+            IDs.erase(IDs.begin()+i);
             return true;
         }
     }
@@ -132,27 +155,9 @@ void snapCircuitsBoard::print(int verbosity)
     ROS_INFO("BOARD: n_rows: %i \t n_cols %i \t current_id %i",n_rows,n_cols,cur_id);
     for (int i = 0; i < parts.size(); ++i)
     {
-        ROS_INFO("Part #%i:\t%s",i,parts[i].toString(verbosity).c_str());
+        ROS_INFO("Part #%i:\t%i %s",i,IDs[i],parts[i].toString(verbosity).c_str());
     }
     ROS_INFO("*****************************");
-}
-
-bool snapCircuitsBoard::reset()
-{
-    cur_id = 0;
-    parts.clear();
-    addPart(snapCircuitsPart("BG")); // The base grid is always the first element
-    parts[0].setXYMax(n_rows,n_cols);
-
-    svg_image = (NSVGimage*)malloc(sizeof(NSVGimage));
-    if (svg_image == NULL) 
-    {
-        free(svg_image);
-        return false;
-    }
-    memset(svg_image, 0, sizeof(NSVGimage));
-
-    return true;
 }
 
 bool snapCircuitsBoard::set_n_rows_and_cols(const int &_r, const int &_c)
