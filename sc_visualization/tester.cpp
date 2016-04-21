@@ -23,28 +23,29 @@ int main(int argc, char** argv)
 
     snapCircuitsPart spPart("WC",snapLocation(7,1,360,10,8));
 
-    if (spPart.loadSVGimage())
-    {
-        for (NSVGshape* shape = spPart.getImage()->shapes; shape != NULL; shape = shape->next) {
-            printNSVGshape(shape);
-        }
-    }
+    // if (spPart.loadSVGimage())
+    // {
+    //     for (NSVGshape* shape = spPart.getImage()->shapes; shape != NULL; shape = shape->next) {
+    //         printNSVGshape(shape);
+    //     }
+    // }
 
     snapCircuitsBoard board;
     board.addPart(spPart);
-    board.createSVGimage();
-    board.print();
-    // board.addPart(snapCircuitsPart("S1",snapLocation(1,1,90)));
-    // board.removePart(1);
-    // board.addPart(snapCircuitsPart("S1",snapLocation(2,4,90)));
-    // board.addPart(snapCircuitsPart("S1",snapLocation(1,5,270)));
-    // board.addPart(snapCircuitsPart("S1",snapLocation(3,3,180)));
-    // board.print(1);
-    // board.removePart(10);
-
+    board.addPart(snapCircuitsPart("WC",snapLocation(1,1,90)));
     
+    board.removePart(1);
+    
+    board.addPart(snapCircuitsPart("WC",snapLocation(2,4,90)));
+    board.addPart(snapCircuitsPart("WC",snapLocation(1,5,270)));
+    board.addPart(snapCircuitsPart("WC",snapLocation(3,3,180)));
+    board.print(1);
+    board.removePart(10);
 
-    if (board.getImage()!=NULL)
+    // board.createSVGimage();
+
+    // if (board.getImage()!=NULL)
+    if (false)
     {
         size_t w=1024;
         size_t h=600;
@@ -75,6 +76,6 @@ int main(int argc, char** argv)
         imwrite("/tmp/out.png", mat);
     }
 
-    printf("Closing..\n");
+    ROS_INFO("Closing..");
     return 0;
 }
