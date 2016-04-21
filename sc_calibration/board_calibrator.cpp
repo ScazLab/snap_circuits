@@ -26,8 +26,10 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-#define MIN_ANGLE   5
-#define MIN_DIST   15
+#define MIN_ANGLE     5
+#define MIN_DIST     15
+#define OUT_IMG_H   400
+#define OUT_IMG_W   571
 
 using namespace std;
  
@@ -212,7 +214,7 @@ private:
 
             if (corners.size()==4)
             {
-                cv::Mat quad = cv::Mat::zeros(800, 1143, CV_8UC3);  // Destination image
+                cv::Mat quad = cv::Mat::zeros(OUT_IMG_H, OUT_IMG_W, CV_8UC3);  // Destination image
                 
                 // Determine top-left, bottom-left, top-right, and bottom-right corner
                 sortCorners(corners);
