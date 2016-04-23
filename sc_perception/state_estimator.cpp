@@ -380,7 +380,7 @@ private:
 public:
 
     /**
-     * Constructor
+     * Constructor 
      */
     StateEstimator(string _name) : rng(ros::Time::now().toSec()),
                                    name(_name), imageTransport(nodeHandle)
