@@ -45,7 +45,6 @@ void BoardCalibrator::callback(const sensor_msgs::ImageConstPtr& msgIn)
 
     // Threshold the image to get only the black parts
     cv::threshold(img_bw,img_bw,150,200, cv::THRESH_BINARY_INV+cv::THRESH_OTSU);
-
     // publishImage(img_bw,sensor_msgs::image_encodings::MONO8);
 
     // Find the biggest blob in the image (hopefully, the board), and fill it to remove the hexagons
@@ -60,74 +59,35 @@ void BoardCalibrator::callback(const sensor_msgs::ImageConstPtr& msgIn)
     // Get the edge map for finding line segments with the Canny method.
     cv::Canny(img_board, img_bw, 30, 30*3, 5);
    
-    if (doShow)
-    {
-        cv::imshow("camera_edges",img_bw);
-    }
+    if (doShow)     cv::imshow("camera_edges",img_bw);
 
     // Detect lines with the Hough transform method.
-    // We use the probabilistic Hough transform rather than the standard one.
-    // It yields less line segments but with higher accuracy.
     vector<cv::Vec2f> lines;
     HoughLines(img_bw, lines, 1, CV_PI/180, 100, 0, 0 );
 
-    // Cluster lines that are relatively close and parallel one another
-    std::vector<int> labels;
-    int numberOfLines = cv::partition(lines, labels, isEqual);
-
-    int numberOfClusters=0;
-    for (int i = 0; i < labels.size(); ++i)
+    if (clusterLines(lines))
     {
-        numberOfClusters=max(numberOfClusters, labels[i]);
-    }
-    numberOfClusters++;
-
-    ROS_INFO("[BoardCalibrator] Number of lines: %zu\tNumber of clusters: %i ", lines.size(), numberOfClusters);
-
-    if (numberOfClusters >= 4)
-    {
-        // Let's keep only one line per cluster. This keeps only the first line of the 
-        // cluster, it should be made better
-        
-        std::vector<cv::Vec2f> lines_filt;
-        int cluster=0;
-        for (int i = 0; i < lines.size(); ++i)
-        {
-            if (labels[i]==cluster)
-            {
-                lines_filt.push_back(lines[i]);
-                cluster++;
-            }
-        }
-
         // Find the intersection between the lines
         std::vector<cv::Point2f> corners;
-        for (int i = 0; i < lines_filt.size(); i++)
+        for (int i = 0; i < lines.size(); i++)
         {
-            for (int j = i+1; j < lines_filt.size(); j++)
+            for (int j = i+1; j < lines.size(); j++)
             {
-                cv::Point2f pt = findIntersection(lines_filt[i], lines_filt[j]);
+                cv::Point2f pt = findIntersection(lines[i], lines[j]);
                 if (pt.x > 0 && pt.y > 0 && pt.x < img_res.cols && pt.y < img_res.rows)
                     corners.push_back(pt);
             }
         }
-
-        // printf("[BoardCalibrator] corners: ");
-        // for (int i = 0; i < corners.size(); ++i)
-        // {
-        //     printf("[%g %g]\t", corners[i].x, corners[i].y );
-        // }
-        // printf("\n");
 
         if (doShow)
         {
             cv::cvtColor(img_bw,img_bw,CV_GRAY2RGB);
 
             // Draw the lines
-            for( size_t i = 0; i < lines_filt.size(); i++ )
+            for( size_t i = 0; i < lines.size(); i++ )
             {
-                float rho   = lines_filt[i][0];
-                float theta = lines_filt[i][1];
+                float rho   = lines[i][0];
+                float theta = lines[i][1];
                 cv::Point pt1;
                 cv::Point pt2;
                 double a = cos(theta);
@@ -150,18 +110,15 @@ void BoardCalibrator::callback(const sensor_msgs::ImageConstPtr& msgIn)
             if (doShow) cv::imshow("camera_lines_and_corners",img_bw);
         }
 
-        // ROS_INFO("[BoardCalibrator] Number of corners: %lu",corners.size());
-
         if (corners.size()!=4)
         {
-            printf("[BoardCalibrator] Corners: "); 
+            printf("[BoardCalibrator] I got %zu Corners: ",corners.size()); 
             for (int i = 0; i < corners.size(); ++i)
             {
                 printf("[%g %g]\t", corners[i].x, corners[i].y);
             }
             printf("\n");
         }
-
         else
         {
             cv::Mat quad = cv::Mat::zeros(OUT_IMG_H, OUT_IMG_W, CV_8UC3);  // Destination image
@@ -184,15 +141,69 @@ void BoardCalibrator::callback(const sensor_msgs::ImageConstPtr& msgIn)
             // Apply perspective transformation
             cv::warpPerspective(cv_ptr->image, quad, transmtx, quad.size());
 
-            // if (doShow)
-            // {
-            //     cv::imshow("image_undistorted",quad);
-            // }
+            // if (doShow) cv::imshow("image_undistorted",quad);
 
             publishImage(quad,sensor_msgs::image_encodings::BGR8);
-            ROS_INFO("Published");
+            ROS_DEBUG("Calibrated Board has been published");
         }
     }
+};
+
+bool BoardCalibrator::clusterLines(std::vector<cv::Vec2f> &lines)
+{
+    // Cluster lines that are relatively close and parallel one another
+    std::vector<int> labels;
+    int numberOfLines = cv::partition(lines, labels, isEqual);
+
+    int numberOfClusters=0;
+    for (int i = 0; i < labels.size(); ++i)
+    {
+        numberOfClusters=max(numberOfClusters, labels[i]);
+    }
+    numberOfClusters++;
+
+    ROS_INFO("[BoardCalibrator] Number of lines: %zu\tNumber of clusters: %i ", lines.size(), numberOfClusters);
+
+    if (numberOfClusters == 4)
+    {
+        // After clustering, we should filter out the unnecessary lines
+        // Let's compute an average of all the lines that belong to a cluster        
+        std::vector<cv::Vec2f> lines_filt;
+        
+        for (int i = 0; i < numberOfClusters; ++i)
+        {
+            cv::Vec2f line(0,0);
+            int cnt=0;
+
+            for (int j = 0; j < lines.size(); ++j)
+            {
+                if (labels[j]==i)
+                {
+                    line[0]=line[0]+lines[j][0];
+                    line[1]=line[1]+lines[j][1];
+                    cnt++;
+                }
+            }
+
+            line[0]=line[0]/cnt;
+            line[1]=line[1]/cnt;
+
+            lines_filt.push_back(line);
+        }
+
+        // printf("[BoardCalibrator] I got %zu Lines Filt ",lines_filt.size()); 
+        // for (int i = 0; i < lines_filt.size(); ++i)
+        // {
+        //     printf("[%g %g]\t", lines_filt[i][0], lines_filt[i][1]);
+        // }
+        // printf("\n");
+
+        lines = lines_filt;
+
+        return true;
+    }
+
+    return false;
 };
 
 bool BoardCalibrator::publishImage(cv::Mat &mat, const std::string encoding)

@@ -82,6 +82,14 @@ private:
     cv::Mat findBiggestBlob(cv::Mat & mat);
 
     /**
+     * Cluster lines that are relatively close and parallel one another
+     * (according to MIN_DIST and MIN_ANGLE respectively).
+     * @param  lines the lines under consideration
+     * @return       true/false if success/failure
+     */
+    bool clusterLines(std::vector<cv::Vec2f> &lines);
+
+    /**
      * Finds the intersection between two lines.
      * @param  a the first  line as a Vec2f (the output of the Hough transform)
      * @param  b the second line as a Vec2f (the output of the Hough transform)
