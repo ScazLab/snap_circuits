@@ -1,20 +1,26 @@
 <launch>
   <env name="ROSCONSOLE_CONFIG_FILE" value="$(find snap_circuits)/rosconsole.conf"/>
 
-  <node name="state_estimator" pkg="snap_circuits" type="state_estimator" respawn="false" output="screen">
-    <param name="show" value="true" />
-    <param name="sub"  value="/snap_circuits/image_undistorted" />
-    <param name="pub"  value="/snap_circuits/board_state" />
-  </node>
-
   <node name="dummy_image_publisher" pkg="snap_circuits" type="dummy_image_publisher" respawn="false" output="screen">
-    <param name="filename" value="$(find snap_circuits)/frame0005.jpg" />
+    <param name="filename" value="$(find snap_circuits)/board_imgs/frame0005.jpg" />
     <param name="pub"  value="/snap_circuits/image_undistorted" />
   </node>
 
-<!--   <node name="image_undistorted" pkg="image_view" type="image_view" respawn="false" output="screen">
+  <node name="image_undistorted" pkg="image_view" type="image_view" respawn="false" output="screen">
     <remap from="image" to="/snap_circuits/image_undistorted"/>
     <param name="autosize" value="true" />
-  </node> -->
+  </node>
+
+  <node name="state_estimator" pkg="snap_circuits" type="state_estimator" respawn="false" output="screen">
+    <param name="show"  value="false" />
+    <param name="sub"   value="/snap_circuits/image_undistorted" />
+    <param name="pubIm" value="/snap_circuits/board_estimated" />
+    <param name="pubSt" value="/snap_circuits/board_state" />
+  </node>
+
+  <node name="board_estimated" pkg="image_view" type="image_view" respawn="false" output="screen">
+    <remap from="image" to="/snap_circuits/board_estimated"/>
+    <param name="autosize" value="true" />
+  </node>
 
 </launch>

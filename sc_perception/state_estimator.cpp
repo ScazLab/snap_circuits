@@ -33,10 +33,10 @@
 #define PXL_THRES 20
 #define MIN_AREA  300
 
-#define X_OFFS 50
-#define Y_OFFS 50
-#define X_STEP 116
-#define Y_STEP 116
+#define X_OFFS 25
+#define Y_OFFS 25
+#define X_STEP 58
+#define Y_STEP 58
 
 using namespace std;
 using namespace snapCircuits;
@@ -60,12 +60,14 @@ class StateEstimator
 private:
     std::string name;
     std::string  sub;
-    std::string  pub;
+    std::string  pubIm;
+    std::string  pubSt;
 
     ros::NodeHandle nodeHandle;
 
     image_transport::ImageTransport imageTransport;
     image_transport::Subscriber     imageSubscriber;
+    image_transport::Publisher      imagePublisher;
     
     ros::Publisher boardStatePublisher;
 
@@ -334,46 +336,69 @@ private:
             boardStatePublisher.publish(board.toMsg());
         }
 
+        // Draw the pegs
+        for (int i = 0; i < pegs.size(); ++i)
+        {
+            cv::circle(img_out, pegs[i], 3, CV_RGB(255,255,255), 1);
+        }
+
+        for (int i = 0; i < hull.size(); ++i)
+        {
+            cv::Rect rect = cv::boundingRect(hull[i]);
+            cv::rectangle(img_out,rect,cv::Scalar(0,0,255),2);
+        }
+
         if (doShow)
         {
-            // Draw the pegs
-            for (int i = 0; i < pegs.size(); ++i)
-            {
-                cv::circle(img_out, pegs[i], 5, CV_RGB(255,255,255), 3);
-            }
-
-            for (int i = 0; i < hull.size(); ++i)
-            {
-                cv::Rect rect = cv::boundingRect(hull[i]);
-                cv::rectangle(img_out,rect,cv::Scalar(0,0,255),3);
-            }
             // Show the image
             cv::imshow("output", img_out);
+            cv::waitKey(5);                  // Wait for a keystroke in the window
         }
-        cv::waitKey(0);                        // Wait for a keystroke in the window
+
+        publishImage(img_out,sensor_msgs::image_encodings::BGR8);
 
         return;
     };
 
+
+    /**
+     * Publishes the image on the topic.
+     * @param mat       the image as cv::Mat
+     * @param encoding  the image encoding
+     * @return          true/false if success/failure
+     */
+    bool publishImage(cv::Mat &mat, const std::string encoding)
+    {
+        cv_bridge::CvImage msgOut;
+        msgOut.encoding = encoding;
+        msgOut.image    = mat;
+
+        imagePublisher.publish(msgOut.toImageMsg());
+        return true;
+    }
+
 public:
 
     /**
-     * Constructor
+     * Constructor 
      */
     StateEstimator(string _name) : rng(ros::Time::now().toSec()),
                                    name(_name), imageTransport(nodeHandle)
     {
         nodeHandle.param(("/"+name+"/show").c_str(), doShow, true);
-        nodeHandle.param<std::string>(("/"+name+"/sub").c_str(), sub, "/snap_circuits/image_undistorted");
-        nodeHandle.param<std::string>(("/"+name+"/pub").c_str(), pub, "/snap_circuits/board_state");
+        nodeHandle.param<std::string>(("/"+name+"/sub"  ).c_str(), sub,   "/snap_circuits/image_undistorted");
+        nodeHandle.param<std::string>(("/"+name+"/pubIm").c_str(), pubIm, "/snap_circuits/board_estimated");
+        nodeHandle.param<std::string>(("/"+name+"/pubSt").c_str(), pubSt, "/snap_circuits/board_state");
 
         imageSubscriber      = imageTransport.subscribe(sub.c_str(),1,&StateEstimator::callback, this);
-        boardStatePublisher  = nodeHandle.advertise<snap_circuits::snap_circuits_board>(pub,1);
+        imagePublisher       = imageTransport.advertise(pubIm,1);
+        boardStatePublisher  = nodeHandle.advertise<snap_circuits::snap_circuits_board>(pubSt,1);
 
-        ROS_INFO("[StateEstimator] Name       set to %s", name.c_str());
-        ROS_INFO("[StateEstimator] Show param set to %i", doShow);
-        ROS_INFO("[StateEstimator] Subscribing    to %s", sub.c_str());
-        ROS_INFO("[StateEstimator] Publishing     to %s", pub.c_str());
+        ROS_INFO("[StateEstimator] Name       set   to %s", name.c_str());
+        ROS_INFO("[StateEstimator] Show param set   to %i", doShow);
+        ROS_INFO("[StateEstimator] Subscribing      to %s", sub.c_str());
+        ROS_INFO("[StateEstimator] Publishing Image to %s", pubIm.c_str());
+        ROS_INFO("[StateEstimator] Publishing State to %s", pubSt.c_str());
 
         if (doShow)
         {
@@ -384,8 +409,6 @@ public:
 
             // cv::moveWindow("input",100,50);
             cv::moveWindow("output",1050,50);
-
-            cv::resizeWindow("output",857,600);
         }
     };
 
@@ -408,8 +431,7 @@ int main(int argc, char** argv)
     std::string name="state_estimator";
 
     ros::init(argc, argv, name.c_str());
-    std::string sub = "/snap_circuits/image_undistorted";
-    std::string pub = "/snap_circuits/board_state";
+
     bool show=false;
 
     // Dirty way to process command line arguments. It seems that
@@ -420,20 +442,8 @@ int main(int argc, char** argv)
 
         if (std::string(argv[1])=="--show")
         {
-            show=std::string(argv[2])=="true"?true:false;
+            show=std::string(argv[2])=="false"?false:true;
             nH.setParam(("/"+name+"/show").c_str(), show);
-        }
-
-        if (argc>3)
-        {
-            sub=std::string(argv[3]);
-            nH.setParam( ("/"+name+"/sub").c_str(), sub.c_str());
-        
-            if (argc>4)
-            {
-                pub=std::string(argv[4]);
-                nH.setParam( ("/"+name+"/pub").c_str(), pub.c_str());
-            }
         }
     }
 
