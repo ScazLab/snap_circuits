@@ -145,7 +145,7 @@ private:
         numberOfClusters++;
 
         ROS_INFO("[BoardCalibrator] Number of lines: %zu\tNumber of clusters: %i ", lines.size(), numberOfClusters);
-        
+
         if (numberOfClusters >= 4)
         {
             // Let's keep only one line per cluster. This keeps only the first line of the 
@@ -164,9 +164,9 @@ private:
 
             // Find the intersection between the lines
             std::vector<cv::Point2f> corners;
-            for (int i = 0; i < lines.size(); i++)
+            for (int i = 0; i < lines_filt.size(); i++)
             {
-                for (int j = i+1; j < lines.size(); j++)
+                for (int j = i+1; j < lines_filt.size(); j++)
                 {
                     cv::Point2f pt = findIntersection(lines_filt[i], lines_filt[j]);
                     if (pt.x > 0 && pt.y > 0 && pt.x < img_res.cols && pt.y < img_res.rows)
@@ -209,10 +209,22 @@ private:
                     cv::circle(img_bw, corners[i], 3, CV_RGB(255,255,255), 2);
                 }
                 
-                cv::imshow("camera_lines_and_corners",img_bw);
+                if (doShow) cv::imshow("camera_lines_and_corners",img_bw);
             }
 
-            if (corners.size()==4)
+            // ROS_INFO("[BoardCalibrator] Number of corners: %lu",corners.size());
+
+            if (corners.size()!=4)
+            {
+                printf("[BoardCalibrator] Corners: "); 
+                for (int i = 0; i < corners.size(); ++i)
+                {
+                    printf("[%g %g]\t", corners[i].x, corners[i].y);
+                }
+                printf("\n");
+            }
+
+            else
             {
                 cv::Mat quad = cv::Mat::zeros(OUT_IMG_H, OUT_IMG_W, CV_8UC3);  // Destination image
                 
@@ -234,12 +246,13 @@ private:
                 // Apply perspective transformation
                 cv::warpPerspective(cv_ptr->image, quad, transmtx, quad.size());
 
-                if (doShow)
-                {
-                    // cv::imshow("image_undistorted",quad);
-                }
+                // if (doShow)
+                // {
+                //     cv::imshow("image_undistorted",quad);
+                // }
 
                 publishImage(quad,sensor_msgs::image_encodings::BGR8);
+                ROS_INFO("Published");
             }
         }
     };
@@ -419,6 +432,10 @@ public:
             cv::moveWindow("camera_thresholded",3000,50);
             cv::moveWindow("camera_edges",3000,600);
             cv::moveWindow("camera_lines_and_corners",3600,200);
+
+            cv::resizeWindow("camera_thresholded",857,600);
+            cv::resizeWindow("camera_edges",857,600);
+            cv::resizeWindow("camera_lines_and_corners",857,600);
         }
     };
 
@@ -430,7 +447,7 @@ public:
         if (doShow)
         {
             ROS_INFO("[BoardCalibrator] Destroying windows..");
-            // cv::destroyWindow("image_undistorted");
+            cv::destroyWindow("camera_lines_and_corners");
             cv::destroyWindow("camera_thresholded");
             cv::destroyWindow("camera_edges");
         }
