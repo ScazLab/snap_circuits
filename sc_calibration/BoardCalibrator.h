@@ -31,9 +31,6 @@
 #define OUT_IMG_H   400
 #define OUT_IMG_W   571
 
-using namespace std;
- 
-
 /**
  * This function detects if two lines are close (distance less then MIN_DIST)
  * and with the same angle (angle less then MIN_ANGLE). It is called by
@@ -97,7 +94,7 @@ private:
      * @param   line The line as a Vec2f (the output of the Hough transform)
      * @return       The vector of points that define the line
      */
-    vector<cv::Point2f> lineToPointPair(cv::Vec2f line);
+    std::vector<cv::Point2f> lineToPointPair(cv::Vec2f line);
 
     /**
      * Determine the top-left, bottom-left, top-right, and bottom-right corners.
@@ -116,7 +113,7 @@ public:
     /**
      * Constructor
      */
-    BoardCalibrator(string _name);
+    BoardCalibrator(std::string _name);
 
     /**
      * Destructor

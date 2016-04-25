@@ -71,7 +71,7 @@ void BoardCalibrator::callback(const sensor_msgs::ImageConstPtr& msgIn)
     vector<cv::Vec2f> lines;
     HoughLines(img_bw, lines, 1, CV_PI/180, 100, 0, 0 );
 
-    // Filter out lines that are close and parallel
+    // Cluster lines that are relatively close and parallel one another
     std::vector<int> labels;
     int numberOfLines = cv::partition(lines, labels, isEqual);
 
