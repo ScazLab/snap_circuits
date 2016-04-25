@@ -26,7 +26,7 @@ bool isEqual(const cv::Vec2f& _l1, const cv::Vec2f& _l2)
 
 void BoardCalibrator::callback(const sensor_msgs::ImageConstPtr& msgIn)
 {
-    // Let's convert the ROS image to OpenCV image format
+    // Convert the ROS image to OpenCV image format
     cv_bridge::CvImageConstPtr cv_ptr;
     try
     {
@@ -59,7 +59,7 @@ void BoardCalibrator::callback(const sensor_msgs::ImageConstPtr& msgIn)
     // Get the edge map for finding line segments with the Canny method.
     cv::Canny(img_board, img_bw, 30, 30*3, 5);
    
-    if (doShow)     cv::imshow("camera_edges",img_bw);
+    if (doShow) cv::imshow("camera_edges",img_bw);
 
     // Detect lines with the Hough transform method.
     vector<cv::Vec2f> lines;
@@ -79,36 +79,7 @@ void BoardCalibrator::callback(const sensor_msgs::ImageConstPtr& msgIn)
             }
         }
 
-        if (doShow)
-        {
-            cv::cvtColor(img_bw,img_bw,CV_GRAY2RGB);
-
-            // Draw the lines
-            for( size_t i = 0; i < lines.size(); i++ )
-            {
-                float rho   = lines[i][0];
-                float theta = lines[i][1];
-                cv::Point pt1;
-                cv::Point pt2;
-                double a = cos(theta);
-                double b = sin(theta);
-                double x0 = a*rho;
-                double y0 = b*rho;
-                pt1.x = cvRound(x0 + 1000*(-b));
-                pt1.y = cvRound(y0 + 1000*(a));
-                pt2.x = cvRound(x0 - 1000*(-b));
-                pt2.y = cvRound(y0 - 1000*(a));
-                cv::line( img_bw, pt1, pt2, cv::Scalar(0,255,0), 2, CV_AA);
-            }
-
-            // Draw corners
-            for (int i = 0; i < corners.size(); i++)
-            {
-                cv::circle(img_bw, corners[i], 3, CV_RGB(255,255,255), 2);
-            }
-            
-            if (doShow) cv::imshow("camera_lines_and_corners",img_bw);
-        }
+        if (doShow) drawCameraLinesCorners(img_bw,lines,corners);
 
         if (corners.size()!=4)
         {
@@ -147,6 +118,40 @@ void BoardCalibrator::callback(const sensor_msgs::ImageConstPtr& msgIn)
             ROS_DEBUG("Calibrated Board has been published");
         }
     }
+};
+
+bool BoardCalibrator::drawCameraLinesCorners(cv::Mat img_bw, 
+                      std::vector<cv::Vec2f> lines, std::vector<cv::Point2f> corners)
+{
+        cv::cvtColor(img_bw,img_bw,CV_GRAY2RGB);
+
+        // Draw the lines
+        for( size_t i = 0; i < lines.size(); i++ )
+        {
+            float rho   = lines[i][0];
+            float theta = lines[i][1];
+            cv::Point pt1;
+            cv::Point pt2;
+            double a = cos(theta);
+            double b = sin(theta);
+            double x0 = a*rho;
+            double y0 = b*rho;
+            pt1.x = cvRound(x0 + 1000*(-b));
+            pt1.y = cvRound(y0 + 1000*(a));
+            pt2.x = cvRound(x0 - 1000*(-b));
+            pt2.y = cvRound(y0 - 1000*(a));
+            cv::line( img_bw, pt1, pt2, cv::Scalar(0,255,0), 2, CV_AA);
+        }
+
+        // Draw corners
+        for (int i = 0; i < corners.size(); i++)
+        {
+            cv::circle(img_bw, corners[i], 3, CV_RGB(255,255,255), 2);
+        }
+        
+        cv::imshow("camera_lines_and_corners",img_bw);
+
+    return true;
 };
 
 bool BoardCalibrator::clusterLines(std::vector<cv::Vec2f> &lines)
@@ -245,10 +250,10 @@ cv::Mat BoardCalibrator::findBiggestBlob(cv::Mat & mat)
     return res;
 };
 
-cv::Point2f BoardCalibrator::findIntersection(cv::Vec2f a, cv::Vec2f b)
+cv::Point2f BoardCalibrator::findIntersection(cv::Vec2f _l1, cv::Vec2f _l2)
 {
-    vector<cv::Point2f> p1 = lineToPointPair(a);
-    vector<cv::Point2f> p2 = lineToPointPair(b);
+    vector<cv::Point2f> p1 = lineToPointPair(_l1);
+    vector<cv::Point2f> p2 = lineToPointPair(_l2);
 
     float denom = (p1[0].x - p1[1].x)*(p2[0].y - p2[1].y) - (p1[0].y - p1[1].y)*(p2[0].x - p2[1].x);
 

@@ -91,11 +91,11 @@ private:
 
     /**
      * Finds the intersection between two lines.
-     * @param  a the first  line as a Vec2f (the output of the Hough transform)
-     * @param  b the second line as a Vec2f (the output of the Hough transform)
-     * @return   the intersection point
+     * @param  _l1 the first  line as a Vec2f (the output of the Hough transform)
+     * @param  _l2 the second line as a Vec2f (the output of the Hough transform)
+     * @return     the intersection point
      */
-    cv::Point2f findIntersection(cv::Vec2f a, cv::Vec2f b);
+    cv::Point2f findIntersection(cv::Vec2f _l1, cv::Vec2f _l2);
 
     /**
      * Converts a Vec2f line into a pair of points.
@@ -115,6 +115,11 @@ private:
      * @return        true/false if success/failure
      */
     bool sortCorners(std::vector<cv::Point2f>& corners);
+
+    /**
+     * TODO
+     */
+    bool drawCameraLinesCorners(cv::Mat img_bw, std::vector<cv::Vec2f> lines, std::vector<cv::Point2f> corners);
     
 public:
 
