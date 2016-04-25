@@ -121,6 +121,7 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(lib/include
+    */sc_calibration/*.h
     ${OpenCV_INCLUDE_DIRS}
     ${catkin_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}
@@ -132,7 +133,7 @@ add_subdirectory(lib)
 ## Declare a C++ executables
 add_executable(visualizer             sc_visualization/visualizer.cpp)
 add_executable(tester                 sc_visualization/tester.cpp)
-add_executable(board_calibrator       sc_calibration/board_calibrator.cpp)
+add_executable(board_calibrator       sc_calibration/BoardCalibrator.h sc_calibration/BoardCalibrator.cpp sc_calibration/board_calibrator.cpp)
 add_executable(state_estimator        sc_perception/state_estimator.cpp)
 add_executable(dummy_image_publisher  sc_perception/dummy_image_publisher.cpp)
 
