@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import numpy as np
 
 N_ROWS = 7
@@ -27,10 +29,32 @@ PART_TAG_LOCATION = {
     '4': np.array([0, 1.5]),
     '5': np.array([0, 1.5]),
     '6': np.array([0, 2.5]),
-    's1': np.array([0, 1.5]),
-    's2': np.array([0, 1.5]),
-    'd1': np.array([0, 1.5]),
-    'u2': np.array([0.5, 1]),
+    'B1': np.array([0, 1.5]),
+    'C2': np.array([0, 1.5]),
+    'C4': np.array([0, 1.5]),
+    'D1': np.array([0, 1.5]),
+    'D8': np.array([0, 1.5]),
+    'D6': np.array([0, 1.5]),
+    'L1': np.array([0, 1.5]),
+    'M1': np.array([0, 1.5]),
+    'Q1': np.array([0.5, 1]),
+    'Q2': np.array([0.5, 1]),
+    'Q4': np.array([0, 1.5]),
+    'R1': np.array([0, 1.5]),
+    'R3': np.array([0, 1.5]),
+    'R5': np.array([0, 1.5]),
+    'RP': np.array([0, 0.5]),
+    'RV': np.array([0, 0.5]),
+    'S1': np.array([0, 1.5]),
+    'S2': np.array([0, 1.5]),
+    'U1': np.array([0.5, 1]),
+    'U2': np.array([0.5, 1]),
+    'U3': np.array([0.5, 1]),
+    'U22': np.array([1, 0.5]),
+    'U23': np.array([0.5, 1]),
+    'U24': np.array([0.5, 0]),
+    'WC': np.array([0, 1.5]),
+    'X1': np.array([0, 1.5]),
     }
 
 
