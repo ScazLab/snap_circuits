@@ -13,6 +13,8 @@ W = W_CELL * (N_COLUMNS - 1) + 2 * W_MARGIN
 
 ORIENTATIONS = {'NORTH': 0, 'EAST': 1, 'SOUTH': 2, 'WEST': 3}
 globals().update(ORIENTATIONS)  # Define NORTH, EAST, ... as global variables
+INVERSE_ORIENTATIONS = {'NORTH': 'SOUTH', 'EAST': 'WEST',
+                        'SOUTH': 'NORTH', 'WEST': 'EAST'}
 
 ROTATION = [(0, -1, 1, 0), (1, 0, 0, 1), (0, 1, -1, 0), (-1, 0, 0, -1)]
 ROTATION = [np.array(r).reshape((2, 2)) for r in ROTATION]
@@ -62,6 +64,21 @@ def tag_from_part_coordinate(loc, label):
     """
     row, col, ori = loc
     drow, dcol, segment = PART_TAG_LOCATION[label]
+
+
+def reverse_cell_location_triplet(loc):
+    """Rotate part location by pi in the board."""
+    r, c, o = loc
+    r, c = ((N_ROWS - 1) - r, (N_COLUMNS - 1) - c)
+    return [r, c, INVERSE_ORIENTATIONS[o.upper()]]
+
+
+def reverse_board_state(board):
+    """Rotate parts location by pi in the board."""
+    rev = deepcopy(board)
+    for p in rev["parts"]:
+        p["location"] = reverse_cell_location_triplet(p["location"])
+    return rev
 
 
 class CellExtractor:
@@ -144,7 +161,3 @@ class LabeledCellExtractor:
         vertical = self._to_labels_and_cells(
             self.cell_extr.all_vertical_cells())
         return vertical, horizontal
-
-
-# Save as a dataset
-#np.savez("dataset", np.vstack([c.flatten() for c in cells]))

@@ -6,7 +6,7 @@ from board_perception.part_classifier import (
     NORTH, SOUTH, EAST, WEST, ROTATION, PART_TAG_LOCATION,
     cell_coordinate, rotate_tag_location, tag_location_from_part,
     inverse_orientation, part_reference_from_tag_location,
-    CellExtractor, LabeledCellExtractor)
+    CellExtractor, LabeledCellExtractor, reverse_board_state)
 
 
 class DummyImage():
@@ -61,10 +61,10 @@ class TestRotations(TestCase):
             tag_location_from_part('5', np.array([4, 3]), SOUTH),
             np.array([5.5, 3]))
         np.testing.assert_array_equal(
-            tag_location_from_part('u2', np.array([4, 3]), WEST),
+            tag_location_from_part('U2', np.array([4, 3]), WEST),
             np.array([3.5, 2]))
         np.testing.assert_array_equal(
-            tag_location_from_part('u2', np.array([4, 3]), NORTH),
+            tag_location_from_part('U2', np.array([4, 3]), NORTH),
             np.array([3, 3.5]))
 
     def test_inverse_orientation(self):
@@ -101,42 +101,48 @@ class TestCellExtractor(TestCase):
             N_ROWS * (N_COLUMNS - 1))
 
 
-class TestLabeledCellExtractor(TestCase):
+class TestWithBoard:
 
     def setUp(self):
-        board = {"parts": [
-                           {"id": 0,
-                            "label": "4",
-                            "location": [1, 4, "west"]
-                            },
-                           {"id": 1,
-                            "label": "2",
-                            "location": [3, 1, "north"]
-                            },
-                           {"id": 9,
-                            "label": "u2",
-                            "location": [4, 6, "east"]
-                            },
-                           {  # Last columns
-                            "id": 10,
-                            "label": "5",
-                            "location": [5, 9, "north"]
-                            },
-                           {  # Last row
-                            "id": 5,
-                            "label": "s1",
-                            "location": [6, 3, "west"]
-                            },
-                           ]}
+        self.board = {"parts": [
+                                {"id": 0,
+                                 "label": "4",
+                                 "location": [1, 4, "west"]
+                                 },
+                                {"id": 1,
+                                 "label": "2",
+                                 "location": [3, 1, "north"]
+                                 },
+                                {"id": 9,
+                                 "label": "U2",
+                                 "location": [4, 6, "east"]
+                                 },
+                                {  # Last columns
+                                 "id": 10,
+                                 "label": "5",
+                                 "location": [5, 9, "north"]
+                                 },
+                                {  # Last row
+                                 "id": 5,
+                                 "label": "S1",
+                                 "location": [6, 3, "west"]
+                                 },
+                                ]}
+
+
+class TestLabeledCellExtractor(TestWithBoard, TestCase):
+
+    def setUp(self):
+        super().setUp()
         img = DummyImage()
-        self.extr = LabeledCellExtractor(img, board)
+        self.extr = LabeledCellExtractor(img, self.board)
 
     def test_set_labels(self):
         labels = {(1, 2.5): ("4", WEST),
                   (2.5, 1): ("2", NORTH),
-                  (4.5, 7): ("u2", EAST),
+                  (4.5, 7): ("U2", EAST),
                   (3.5, 9): ("5", NORTH),
-                  (6, 1.5): ("s1", WEST)}
+                  (6, 1.5): ("S1", WEST)}
         self.assertEqual(labels, self.extr.labels)
 
     def test_labeled_cells(self):
@@ -145,18 +151,48 @@ class TestLabeledCellExtractor(TestCase):
         self.assertEqual(10 * 6, len(v))
         non_empty_h = [(l, o, c) for ((l, o), c) in h if l is not None]
         non_empty_v = [(l, o, c) for ((l, o), c) in v if l is not None]
-        self.assertEqual(set([("4", WEST), ("s1", WEST)]),
+        self.assertEqual(set([("4", WEST), ("S1", WEST)]),
                          set([(l, o) for (l, o, c) in non_empty_h]))
-        self.assertEqual(set([("2", NORTH), ("u2", EAST), ("5", NORTH)]),
+        self.assertEqual(set([("2", NORTH), ("U2", EAST), ("5", NORTH)]),
                          set([(l, o) for (l, o, c) in non_empty_v]))
         # This is only a non-regression test from a known correct state
         self.assertEqual(set([("4", (106, 148, 111, 129)),
-                              ("s1", (537, 579, 71, 89))]),
+                              ("S1", (537, 579, 71, 89))]),
                          set([(l, c) for (l, o, c) in non_empty_h]))
         self.assertEqual(set([("2", (235, 277, 51, 69)),
-                              ("u2", (408, 450, 290, 308)),
+                              ("U2", (408, 450, 290, 308)),
                               ("5", (322, 364, 370, 388))]),
                          set([(l, c) for (l, o, c) in non_empty_v]))
+
+
+class TestReverseBoard(TestWithBoard, TestCase):
+
+    def test_reverse(self):
+        reverse = {"parts": [
+                             {"id": 0,
+                              "label": "4",
+                              "location": [5, 5, "EAST"]
+                              },
+                             {"id": 1,
+                              "label": "2",
+                              "location": [3, 8, "SOUTH"]
+                              },
+                             {"id": 9,
+                              "label": "U2",
+                              "location": [2, 3, "WEST"]
+                              },
+                             {  # Last columns
+                              "id": 10,
+                              "label": "5",
+                              "location": [1, 0, "SOUTH"]
+                              },
+                             {  # Last row
+                              "id": 5,
+                              "label": "S1",
+                              "location": [0, 6, "EAST"]
+                              },
+                             ]}
+        self.assertEqual(reverse_board_state(self.board), reverse)
 
 
 def visual_test():
