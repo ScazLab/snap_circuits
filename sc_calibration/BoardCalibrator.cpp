@@ -11,15 +11,14 @@ bool isEqual(const cv::Vec2f& _l1, const cv::Vec2f& _l2)
     float rho2   = l2[0];
     float theta2 = l2[1]*180/CV_PI;
 
-    float angle=abs(theta2-theta1);
+    float angle=max(theta1,theta2)-min(theta1,theta2);
+    if (angle >= 90)  angle=180-angle;
     float dist=abs(rho1-rho2);
 
-    ROS_DEBUG("[BoardCalibrator] Angle is %g\tDist is %g", angle, dist);
+    ROS_DEBUG("[BoardCalibrator::isEqual] l1 is %g %g\tl2 is %g %g\tAngle is %g\tDist is %g YES",
+                                         rho1, theta1, rho2, theta2, angle, dist);
 
-    if (angle > MIN_ANGLE || dist > MIN_DIST)
-    {
-        return false;
-    }
+    if (angle > MIN_ANGLE || dist > MIN_DIST)   { return false; }
 
     return true;
 }
@@ -27,6 +26,11 @@ bool isEqual(const cv::Vec2f& _l1, const cv::Vec2f& _l2)
 BoardCalibrator::BoardCalibrator(string _name) : name(_name), imageTransport(nodeHandle)
 {
     pthread_mutex_init(&this->mutex, NULL);
+
+    for (int i = 0; i < 4; ++i)
+    {
+        corners.push_back(cvPointFilter());
+    }
 
     nodeHandle.param(("/"+name+"/show").c_str(), doShow, true);
     nodeHandle.param<std::string>(("/"+name+"/sub").c_str(), sub, "/usb_cam/image_raw");
@@ -101,16 +105,16 @@ void BoardCalibrator::callback(const sensor_msgs::ImageConstPtr& msgIn)
     if (clusterLines(lines))
     {
         // Find the intersection between the lines
-        std::vector<cv::Point2f> corners = findCorners(lines, img_res.cols, img_res.rows);
+        std::vector<cv::Point2f> crnrs = findCorners(lines, img_res.cols, img_res.rows);
 
-        if (doShow) drawCameraLinesCorners(img_bw,lines,corners);
+        if (doShow) drawCameraLinesCorners(img_bw,lines,crnrs);
 
-        if (corners.size()!=4)
+        if (crnrs.size()!=4)
         {
-            printf("[BoardCalibrator] I got %zu Corners: ",corners.size()); 
-            for (int i = 0; i < corners.size(); ++i)
+            printf("[BoardCalibrator] I got %zu Corners: ",crnrs.size()); 
+            for (int i = 0; i < crnrs.size(); ++i)
             {
-                printf("[%g %g]\t", corners[i].x, corners[i].y);
+                printf("[%g %g]\t", crnrs[i].x, crnrs[i].y);
             }
             printf("\n");
         }
@@ -119,7 +123,7 @@ void BoardCalibrator::callback(const sensor_msgs::ImageConstPtr& msgIn)
             cv::Mat quad = cv::Mat::zeros(OUT_IMG_H, OUT_IMG_W, CV_8UC3);  // Destination image
             
             // Determine top-left, bottom-left, top-right, and bottom-right corner
-            sortCorners(corners);
+            sortCorners(crnrs);
 
             // Apply the perspective transformation
 
@@ -131,7 +135,7 @@ void BoardCalibrator::callback(const sensor_msgs::ImageConstPtr& msgIn)
             quad_pts.push_back(cv::Point2f(0, quad.rows));
 
             // Get transformation matrix
-            cv::Mat transmtx = cv::getPerspectiveTransform(corners, quad_pts);
+            cv::Mat transmtx = cv::getPerspectiveTransform(crnrs, quad_pts);
 
             // Apply perspective transformation
             cv::warpPerspective(cv_ptr->image, quad, transmtx, quad.size());
@@ -147,21 +151,21 @@ void BoardCalibrator::callback(const sensor_msgs::ImageConstPtr& msgIn)
 std::vector<cv::Point2f> BoardCalibrator::findCorners(std::vector<cv::Vec2f> lines,
                                 const int &cols, const int &rows)
 {
-    std::vector<cv::Point2f> corners;
+    std::vector<cv::Point2f> res;
     for (int i = 0; i < lines.size(); i++)
     {
         for (int j = i+1; j < lines.size(); j++)
         {
             cv::Point2f pt = findIntersection(lines[i], lines[j]);
             if (pt.x > 0 && pt.y > 0 && pt.x < cols && pt.y < rows)
-                corners.push_back(pt);
+                res.push_back(pt);
         }
     }
-    return corners;
+    return res;
 };
 
 bool BoardCalibrator::drawCameraLinesCorners(cv::Mat img_bw, 
-                      std::vector<cv::Vec2f> lines, std::vector<cv::Point2f> corners)
+                      std::vector<cv::Vec2f> lines, std::vector<cv::Point2f> _corners)
 {
         cv::cvtColor(img_bw,img_bw,CV_GRAY2RGB);
 
@@ -184,10 +188,15 @@ bool BoardCalibrator::drawCameraLinesCorners(cv::Mat img_bw,
         }
 
         // Draw corners
-        for (int i = 0; i < corners.size(); i++)
-        {
-            cv::circle(img_bw, corners[i], 3, CV_RGB(255,255,255), 2);
-        }
+        // for (int i = 0; i < _corners.size(); i++)
+        // {
+        //     cv::circle(img_bw, _corners[i], 3, CV_RGB(255,255,255), 2);
+        // }
+
+        cv::circle(img_bw, _corners[0], 3, CV_RGB(  0,255,255), 2);
+        cv::circle(img_bw, _corners[1], 3, CV_RGB(255,  0,255), 2);
+        cv::circle(img_bw, _corners[2], 3, CV_RGB(255,255,  0), 2);
+        cv::circle(img_bw, _corners[3], 3, CV_RGB(255,255,255), 2);
         
         cv::imshow("camera_lines_and_corners",img_bw);
 
@@ -196,7 +205,6 @@ bool BoardCalibrator::drawCameraLinesCorners(cv::Mat img_bw,
 
 bool BoardCalibrator::clusterLines(std::vector<cv::Vec2f> &lines)
 {
-    // Cluster lines that are relatively close and parallel one another
     std::vector<int> labels;
     int numberOfLines = cv::partition(lines, labels, isEqual);
 
@@ -209,7 +217,16 @@ bool BoardCalibrator::clusterLines(std::vector<cv::Vec2f> &lines)
 
     ROS_INFO("[BoardCalibrator] Number of lines: %zu\tNumber of clusters: %i ", lines.size(), numberOfClusters);
 
-    if (numberOfClusters == 4)
+    if (numberOfClusters!=4)
+    {
+        printf("[BoardCalibrator] I got %zu Lines: ",lines.size()); 
+        for (int i = 0; i < lines.size(); ++i)
+        {
+            printf("[%g %g %i]\t", lines[i][0], lines[i][1], labels[i]);
+        }
+        printf("\n");
+    }
+    else
     {
         // After clustering, we should filter out the unnecessary lines
         // Let's compute an average of all the lines that belong to a cluster        
@@ -235,13 +252,6 @@ bool BoardCalibrator::clusterLines(std::vector<cv::Vec2f> &lines)
 
             lines_filt.push_back(line);
         }
-
-        // printf("[BoardCalibrator] I got %zu Lines Filt ",lines_filt.size()); 
-        // for (int i = 0; i < lines_filt.size(); ++i)
-        // {
-        //     printf("[%g %g]\t", lines_filt[i][0], lines_filt[i][1]);
-        // }
-        // printf("\n");
 
         lines = lines_filt;
 
@@ -319,9 +329,9 @@ vector<cv::Point2f> BoardCalibrator::lineToPointPair(cv::Vec2f line)
     return points;
 };
 
-bool BoardCalibrator::sortCorners(std::vector<cv::Point2f>& corners)
+bool BoardCalibrator::sortCorners(std::vector<cv::Point2f> &_corners)
 {
-    if (corners.size() != 4)
+    if (_corners.size() != 4)
     {
         ROS_ERROR("[BoardCalibrator::sortCorners] The number of corners should be 4.");
         return false;
@@ -329,20 +339,20 @@ bool BoardCalibrator::sortCorners(std::vector<cv::Point2f>& corners)
 
     // 1. Compute the mass center
     cv::Point2f center(0,0);
-    for (int i = 0; i < corners.size(); i++)
-        center += corners[i];
+    for (int i = 0; i < _corners.size(); i++)
+        center += _corners[i];
 
-    center *= (1. / corners.size());
+    center *= (1. / _corners.size());
     
     // 2. Points that have lower y-axis than the mass center are the top points.
     std::vector<cv::Point2f> top, bot;
 
-    for (int i = 0; i < corners.size(); i++)
+    for (int i = 0; i < _corners.size(); i++)
     {
-        if (corners[i].y < center.y)
-            top.push_back(corners[i]);
+        if (_corners[i].y < center.y)
+            top.push_back(_corners[i]);
         else
-            bot.push_back(corners[i]);
+            bot.push_back(_corners[i]);
     }
 
     // 3. Given two top points, the one with lower x-axis is the top-left.
@@ -353,11 +363,11 @@ bool BoardCalibrator::sortCorners(std::vector<cv::Point2f>& corners)
     cv::Point2f bl = bot[0].x > bot[1].x ? bot[1] : bot[0];
     cv::Point2f br = bot[0].x > bot[1].x ? bot[0] : bot[1];
 
-    corners.clear();
-    corners.push_back(tl);
-    corners.push_back(tr);
-    corners.push_back(br);
-    corners.push_back(bl);
+    _corners.clear();
+    _corners.push_back(tl);
+    _corners.push_back(tr);
+    _corners.push_back(br);
+    _corners.push_back(bl);
 
     return true;
 };

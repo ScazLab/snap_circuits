@@ -26,10 +26,13 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
+#include "Filters.h"
+
 #define MIN_ANGLE     5
 #define MIN_DIST     15
 #define OUT_IMG_H   400
 #define OUT_IMG_W   571
+#define FILT_WINDOW   7
 
 /**
  * This function detects if two lines are close (distance less then MIN_DIST)
@@ -42,12 +45,15 @@
  */
 bool isEqual(const cv::Vec2f& _l1, const cv::Vec2f& _l2);
 
+/**
+ * BoardCalibrator class.
+ */
 class BoardCalibrator
 {
 private:
-    std::string name;
-    std::string  sub;
-    std::string  pub;
+    std::string name;   // name
+    std::string  sub;   // topic to be subscribed to
+    std::string  pub;   // topic to publish to
 
     ros::NodeHandle nodeHandle;
 
@@ -58,6 +64,8 @@ private:
     bool doShow;
 
     pthread_mutex_t mutex;
+
+    std::vector<cvPointFilter> corners;
 
     /**
      * Callback on the subscriber's topic
@@ -111,10 +119,10 @@ private:
      *  2. Points that have lower y-axis than the mass center are the top points.
      *  3. Given two top points, the one with lower x-axis is the top-left.
      *  4. Given two bottom points, apply the same rule as #3
-     * @param corners the corners under consideration ()
-     * @return        true/false if success/failure
+     * @param  _c the corners under consideration
+     * @return    true/false if success/failure
      */
-    bool sortCorners(std::vector<cv::Point2f>& corners);
+    bool sortCorners(std::vector<cv::Point2f> &_c);
 
     /**
      * @brief Creates the output picture for debugging purposes
