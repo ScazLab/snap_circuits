@@ -117,9 +117,30 @@ private:
     bool sortCorners(std::vector<cv::Point2f>& corners);
 
     /**
-     * TODO
-     */
+     * @brief Creates the output picture for debugging purposes
+     * @details This function creates a b/w image with the result of the Canny
+     * filtering on the thresholded input image, plus the lines that should represent
+     * the board, plus their intersections (i.e. the board corners)
+     * 
+     * @param img_bw  the image to draw the graphics on
+     * @param lines   the std::vector of cv::Vec2f lines
+     * @param corners the std::vector of cv::Point2f which represent the intersection between the lines
+     * 
+     * @return true/false if success/failure
+     */                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
     bool drawCameraLinesCorners(cv::Mat img_bw, std::vector<cv::Vec2f> lines, std::vector<cv::Point2f> corners);
+
+    /**
+     * @brief   Finds corners between a set of lines
+     * @details This function finds intersections between a vector of cv::Vec2f lines.
+     * Intersections that are below or above the image margins are discarded.
+     * 
+     * @param lines The std::vector of cv::Vec2f lines
+     * @param cols  The number of columns of the image
+     * @param rows  The number of rows of the image
+     * @return      A std::vector of cv::Point2f which represent the intersection between the lines
+     */
+    std::vector<cv::Point2f> findCorners(std::vector<cv::Vec2f> lines, const int &cols, const int &rows);
     
 public:
 

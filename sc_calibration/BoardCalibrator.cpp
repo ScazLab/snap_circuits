@@ -24,6 +24,39 @@ bool isEqual(const cv::Vec2f& _l1, const cv::Vec2f& _l2)
     return true;
 }
 
+BoardCalibrator::BoardCalibrator(string _name) : name(_name), imageTransport(nodeHandle)
+{
+    pthread_mutex_init(&this->mutex, NULL);
+
+    nodeHandle.param(("/"+name+"/show").c_str(), doShow, true);
+    nodeHandle.param<std::string>(("/"+name+"/sub").c_str(), sub, "/usb_cam/image_raw");
+    nodeHandle.param<std::string>(("/"+name+"/pub").c_str(), pub, "/snap_circuits/image_undistorted");
+
+    imageSubscriber = imageTransport.subscribe(sub.c_str(),1,&BoardCalibrator::callback, this);
+    imagePublisher  = imageTransport.advertise(pub,1);
+
+    ROS_INFO("[BoardCalibrator] Show param set to %i", doShow);
+    ROS_INFO("[BoardCalibrator] Subscribing    to %s", sub.c_str());
+    ROS_INFO("[BoardCalibrator] Publishing     to %s", pub.c_str());
+
+    if (doShow)
+    {
+        ROS_INFO("[BoardCalibrator] Creating windows..");
+        cv::namedWindow("camera_thresholded", CV_WINDOW_AUTOSIZE | CV_GUI_NORMAL);
+        cv::namedWindow("camera_edges", CV_WINDOW_AUTOSIZE | CV_GUI_NORMAL);
+        cv::namedWindow("camera_lines_and_corners", CV_WINDOW_AUTOSIZE | CV_GUI_NORMAL);
+        cv::startWindowThread();
+
+        cv::moveWindow("camera_thresholded",3000,50);
+        cv::moveWindow("camera_edges",3000,600);
+        cv::moveWindow("camera_lines_and_corners",3600,200);
+
+        cv::resizeWindow("camera_thresholded",857,600);
+        cv::resizeWindow("camera_edges",857,600);
+        cv::resizeWindow("camera_lines_and_corners",857,600);
+    }
+};
+
 void BoardCalibrator::callback(const sensor_msgs::ImageConstPtr& msgIn)
 {
     // Convert the ROS image to OpenCV image format
@@ -68,16 +101,7 @@ void BoardCalibrator::callback(const sensor_msgs::ImageConstPtr& msgIn)
     if (clusterLines(lines))
     {
         // Find the intersection between the lines
-        std::vector<cv::Point2f> corners;
-        for (int i = 0; i < lines.size(); i++)
-        {
-            for (int j = i+1; j < lines.size(); j++)
-            {
-                cv::Point2f pt = findIntersection(lines[i], lines[j]);
-                if (pt.x > 0 && pt.y > 0 && pt.x < img_res.cols && pt.y < img_res.rows)
-                    corners.push_back(pt);
-            }
-        }
+        std::vector<cv::Point2f> corners = findCorners(lines, img_res.cols, img_res.rows);
 
         if (doShow) drawCameraLinesCorners(img_bw,lines,corners);
 
@@ -118,6 +142,22 @@ void BoardCalibrator::callback(const sensor_msgs::ImageConstPtr& msgIn)
             ROS_DEBUG("Calibrated Board has been published");
         }
     }
+};
+
+std::vector<cv::Point2f> BoardCalibrator::findCorners(std::vector<cv::Vec2f> lines,
+                                const int &cols, const int &rows)
+{
+    std::vector<cv::Point2f> corners;
+    for (int i = 0; i < lines.size(); i++)
+    {
+        for (int j = i+1; j < lines.size(); j++)
+        {
+            cv::Point2f pt = findIntersection(lines[i], lines[j]);
+            if (pt.x > 0 && pt.y > 0 && pt.x < cols && pt.y < rows)
+                corners.push_back(pt);
+        }
+    }
+    return corners;
 };
 
 bool BoardCalibrator::drawCameraLinesCorners(cv::Mat img_bw, 
@@ -320,39 +360,6 @@ bool BoardCalibrator::sortCorners(std::vector<cv::Point2f>& corners)
     corners.push_back(bl);
 
     return true;
-};
-
-BoardCalibrator::BoardCalibrator(string _name) : name(_name), imageTransport(nodeHandle)
-{
-    pthread_mutex_init(&this->mutex, NULL);
-
-    nodeHandle.param(("/"+name+"/show").c_str(), doShow, true);
-    nodeHandle.param<std::string>(("/"+name+"/sub").c_str(), sub, "/usb_cam/image_raw");
-    nodeHandle.param<std::string>(("/"+name+"/pub").c_str(), pub, "/snap_circuits/image_undistorted");
-
-    imageSubscriber = imageTransport.subscribe(sub.c_str(),1,&BoardCalibrator::callback, this);
-    imagePublisher  = imageTransport.advertise(pub,1);
-
-    ROS_INFO("[BoardCalibrator] Show param set to %i", doShow);
-    ROS_INFO("[BoardCalibrator] Subscribing    to %s", sub.c_str());
-    ROS_INFO("[BoardCalibrator] Publishing     to %s", pub.c_str());
-
-    if (doShow)
-    {
-        ROS_INFO("[BoardCalibrator] Creating windows..");
-        cv::namedWindow("camera_thresholded");
-        cv::namedWindow("camera_edges");
-        cv::namedWindow("camera_lines_and_corners");
-        cv::startWindowThread();
-
-        cv::moveWindow("camera_thresholded",3000,50);
-        cv::moveWindow("camera_edges",3000,600);
-        cv::moveWindow("camera_lines_and_corners",3600,200);
-
-        cv::resizeWindow("camera_thresholded",857,600);
-        cv::resizeWindow("camera_edges",857,600);
-        cv::resizeWindow("camera_lines_and_corners",857,600);
-    }
 };
 
 BoardCalibrator::~BoardCalibrator()
