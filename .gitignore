@@ -30,6 +30,7 @@ snap_circuits_data/board_imgs
 *.exe
 *.out
 *.app
+*.pyc
 
 # Sublime projects
 *.sublime-*
