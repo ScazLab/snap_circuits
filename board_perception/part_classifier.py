@@ -206,13 +206,25 @@ class LabeledCellExtractor:
         return vertical, horizontal
 
 
-def _get_training_data_from(name, reverse=False):
+class PartDetector:
+
+    def __init__(self):
+        self.extr = CellExtractor()
+
+    def analyse_board(self, board_image):
+        self.extr.set_image(board_image)
+
+
+def _get_training_data_from(name, reverse=False, ext='png'):
     with open(os.path.join(BOARD_DATA, name + '.json')) as b:
         board = json.load(b)
     if reverse:
         board = reverse_board_state(board)
         name += 'R'
-    img = cv2.imread(os.path.join(BOARD_DATA, name + '.png'))
+    img_path = os.path.join(BOARD_DATA, name + '.' + ext)
+    img = cv2.imread(img_path)
+    if img is None:
+        raise IOError('Could not find file: {}.'.format(img_path))
     # Create alpha channel
     extr = LabeledCellExtractor(img, board)
     return extr.labeled_cells()
@@ -261,17 +273,50 @@ def train_classifier():
     v_array, v_label, h_array, h_label = load_training_data()
     print("Training horizontal classifier")
     t = time.time()
-    h_classifier = SVC()
+    h_classifier = SVC(kernel='linear')
     h_classifier.fit(h_array, h_label)
     print("Training time: {}s".format(time.time() - t))
-    joblib.dump((None, h_classifier), CLASSIFIERS_FILE)
+    print("Training vertical classifier")
+    t = time.time()
+    v_classifier = SVC(kernel='linear')
+    v_classifier.fit(v_array, v_label)
+    print("Training time: {}s".format(time.time() - t))
+    joblib.dump((v_classifier, h_classifier), CLASSIFIERS_FILE)
     # Training error
     t = time.time()
     h_predicted = h_classifier.predict(h_array)
+    v_predicted = v_classifier.predict(v_array)
     print("Prediction time: {}s".format(time.time() - t))
     print("Confusion matrix:\n%s" % confusion_matrix(
         [str(t) for t in h_label],
         [str(t) for t in h_predicted]))
+    print("Confusion matrix:\n%s" % confusion_matrix(
+        [str(t) for t in v_label],
+        [str(t) for t in v_predicted]))
+
+
+def evaluate_classifier():
+    v_classif, h_classif = load_classifier()
+    v_cells, h_cells = _get_training_data_from('board_evaluation')
+    # Also use reverse image as evaluation data
+    for cells in [v_cells, h_cells]:
+        cells.extend([_reverse_example(l_o, c) for (l_o, c) in cells])
+    # Stack data into array
+    v_array = np.vstack([c.flatten() for (_, c) in v_cells])
+    h_array = np.vstack([c.flatten() for (_, c) in h_cells])
+    v_label = np.array([l_o for (l_o, _) in v_cells],
+                       dtype=[('label', 'S8'), ('orientation', 'i1')])
+    h_label = np.array([l_o for (l_o, _) in h_cells],
+                       dtype=[('label', 'S8'), ('orientation', 'i1')])
+    v_pred = v_classif.predict(v_array)
+    h_pred = h_classif.predict(h_array)
+    print("Confusion matrices:")
+    print(confusion_matrix([str(t) for t in v_label],
+                           [str(t) for t in v_pred]))
+    print(sorted(list(set([str(t) for t in list(v_label) + list(v_pred)]))))
+    print(confusion_matrix([str(t) for t in h_label],
+                           [str(t) for t in h_pred]))
+    print(sorted(list(set([str(t) for t in list(h_label) + list(h_pred)]))))
 
 
 def load_classifier():

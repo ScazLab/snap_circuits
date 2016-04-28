@@ -2,7 +2,7 @@ from unittest import TestCase
 import numpy as np
 
 from board_perception.part_classifier import (
-    H_MARGIN, W_MARGIN, H_CELL, W_CELL, N_ROWS, N_COLUMNS,
+    DATA, H_MARGIN, W_MARGIN, H_CELL, W_CELL, N_ROWS, N_COLUMNS,
     NORTH, SOUTH, EAST, WEST, ROTATION, PART_TAG_LOCATION,
     cell_coordinate, rotate_tag_location, tag_location_from_part,
     inverse_orientation, part_reference_from_tag_location,
@@ -199,10 +199,11 @@ def visual_test():
     import os
     import json
     import cv2
-    data = os.path.join(os.path.dirname(__file__), '../../data/')
-    with open(os.path.join(data, 'board5.json')) as b:
+    data = os.path.join(DATA, 'boards')
+    name = 'board_evaluation'
+    with open(os.path.join(data, name + '.json')) as b:
         board = json.load(b)
-    img = cv2.imread(os.path.join(data, 'frame0005.jpg'))
+    img = cv2.imread(os.path.join(data, name + '.jpg'))
     # Create alpha channel
     alpha = .2 * np.ones((img.shape[0], img.shape[1], 1))
     extr = LabeledCellExtractor(alpha, board)
