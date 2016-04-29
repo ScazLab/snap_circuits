@@ -2,7 +2,7 @@
   <env name="ROSCONSOLE_CONFIG_FILE" value="$(find snap_circuits)/rosconsole.conf"/>
 
   <node name="dummy_image_publisher" pkg="snap_circuits" type="dummy_image_publisher" respawn="false" output="screen">
-    <param name="filename" value="$(find snap_circuits)/board_imgs/frame0005.jpg" />
+    <param name="filename" value="$(find snap_circuits)/snap_circuits_data/board_imgs/frame0005.jpg" />
     <param name="pub"  value="/snap_circuits/image_undistorted" />
   </node>
 
