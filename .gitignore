@@ -1,3 +1,7 @@
+# Data repo
+snap_circuits_data
+snap_circuits_data/board_imgs
+
 # Compiled Object files
 *.slo
 *.lo
