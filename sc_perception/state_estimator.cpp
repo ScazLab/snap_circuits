@@ -281,7 +281,7 @@ private:
     }
 
     /**
-     * Callback on the subscriber's topic. For now it opens a jpg file
+     * Callback on the subscriber's topic.
      * @param msgIn an RGB image
      */
     void callback(const sensor_msgs::ImageConstPtr& msgIn)
