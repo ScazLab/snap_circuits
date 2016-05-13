@@ -27,7 +27,8 @@ W_CELL = 251.5 / (N_COLUMNS - 1)
 H = H_CELL * (N_ROWS - 1) + 2 * H_MARGIN  # Total board dimensions
 W = W_CELL * (N_COLUMNS - 1) + 2 * W_MARGIN
 
-ORIENTATIONS = {'NORTH': 0, 'EAST': 1, 'SOUTH': 2, 'WEST': 3}
+ORIENTATION_NAMES = ['NORTH', 'EAST', 'SOUTH', 'WEST']
+ORIENTATIONS = {name: i for i, name in enumerate(ORIENTATION_NAMES)}
 globals().update(ORIENTATIONS)  # Define NORTH, EAST, ... as global variables
 INVERSE_ORIENTATIONS = {'NORTH': 'SOUTH', 'EAST': 'WEST',
                         'SOUTH': 'NORTH', 'WEST': 'EAST'}
@@ -208,11 +209,43 @@ class LabeledCellExtractor:
 
 class PartDetector:
 
-    def __init__(self):
+    def __init__(self, path=CLASSIFIERS_FILE):
         self.extr = CellExtractor()
+        self.v_classifier, self.h_classifier = load_classifier(path=path)
+
+    def train_and_save(self):
+        raise NotImplemented
 
     def analyse_board(self, board_image):
         self.extr.set_image(board_image)
+        found = self._find_labels(self.extr.all_vertical_cells(), 'v')
+        found += self._find_labels(self.extr.all_horizontal_cells(), 'h')
+        # Compute part location from tag location
+        parts = [(label,
+                  part_reference_from_tag_location(label, loc, orientation),
+                  orientation)
+                 for (label, loc, orientation) in found
+                 ]
+        return {'parts': [
+            {'id': i, 'label': label,
+             'location': [int(r), int(c), ORIENTATION_NAMES[o]]}
+            for i, (label, (r, c), o) in enumerate(parts)
+            ]}
+
+    def _find_labels(self, cells, orientation):
+        cells = list(cells)
+        array = np.vstack([img.flatten() for r, c, img in cells])
+        if orientation == 'v':
+            classif = self.v_classifier
+        elif orientation == 'h':
+            classif = self.h_classifier
+        else:
+            raise ValueError()
+        labels = classif.predict(array)
+        return [(label, (r, c), orientation)
+                for (r, c, img), (label, orientation) in zip(cells, labels)
+                if label is not None
+                ]
 
 
 def _get_training_data_from(name, reverse=False, ext='png'):
@@ -319,5 +352,5 @@ def evaluate_classifier():
     print(sorted(list(set([str(t) for t in list(h_label) + list(h_pred)]))))
 
 
-def load_classifier():
-    return joblib.load(CLASSIFIERS_FILE)
+def load_classifier(path=CLASSIFIERS_FILE):
+    return joblib.load(path)

@@ -5,8 +5,8 @@ from board_perception.part_classifier import (
     DATA, H_MARGIN, W_MARGIN, H_CELL, W_CELL, N_ROWS, N_COLUMNS,
     NORTH, SOUTH, EAST, WEST, ROTATION, PART_TAG_LOCATION,
     cell_coordinate, rotate_tag_location, tag_location_from_part,
-    inverse_orientation, part_reference_from_tag_location,
-    CellExtractor, LabeledCellExtractor, reverse_board_state)
+    inverse_orientation, part_reference_from_tag_location, _reverse_example,
+    CellExtractor, LabeledCellExtractor, reverse_board_state, PartDetector)
 
 
 class DummyImage():
@@ -16,6 +16,33 @@ class DummyImage():
     def __getitem__(self, slices):
         return (slices[0].start, slices[0].stop,
                 slices[1].start, slices[1].stop)
+
+
+class DummyImage2(DummyImage):
+
+    def __getitem__(self, slices):
+        return np.array([[slices[0].start, slices[0].stop],
+                         [slices[1].start, slices[1].stop],
+                         ])[:, :, np.newaxis]
+
+
+class DummyClassifier:
+
+    def fit(self, arrays, labels):
+        self.known = {}
+        for a, l in zip(arrays, labels):
+            self.known[str(a)] = l
+
+    def predict(self, arrays):
+        return [self.known[str(a)] for a in arrays]
+
+
+class DummyDetector(PartDetector):
+
+    def __init__(self):
+        self.extr = CellExtractor()
+        self.v_classifier = DummyClassifier()
+        self.h_classifier = DummyClassifier()
 
 
 class TestCellCoordinate(TestCase):
@@ -107,25 +134,25 @@ class TestWithBoard:
         self.board = {"parts": [
                                 {"id": 0,
                                  "label": "4",
-                                 "location": [1, 4, "west"]
+                                 "location": [1, 4, "WEST"]
                                  },
                                 {"id": 1,
                                  "label": "2",
-                                 "location": [3, 1, "north"]
+                                 "location": [3, 1, "NORTH"]
                                  },
                                 {"id": 9,
                                  "label": "U2",
-                                 "location": [4, 6, "east"]
+                                 "location": [4, 6, "EAST"]
                                  },
                                 {  # Last columns
                                  "id": 10,
                                  "label": "5",
-                                 "location": [5, 9, "north"]
+                                 "location": [5, 9, "NORTH"]
                                  },
                                 {  # Last row
                                  "id": 5,
                                  "label": "S1",
-                                 "location": [6, 3, "west"]
+                                 "location": [6, 3, "WEST"]
                                  },
                                 ]}
 
@@ -193,6 +220,34 @@ class TestReverseBoard(TestWithBoard, TestCase):
                               },
                              ]}
         self.assertEqual(reverse_board_state(self.board), reverse)
+
+
+class TestPartDetector(TestWithBoard, TestCase):
+
+    maxDiff = None
+
+    def setUp(self):
+        super().setUp()
+        self.detector = DummyDetector()
+        self.img = DummyImage2()
+        extr = LabeledCellExtractor(self.img, self.board)
+        vert, hori = extr.labeled_cells()
+        vert += [_reverse_example(l_o, c) for (l_o, c) in vert]
+        hori += [_reverse_example(l_o, c) for (l_o, c) in hori]
+        self.detector.v_classifier.fit(
+            np.vstack([c.flatten() for l, c in vert]),
+            [l for l, c in vert])
+        self.detector.h_classifier.fit(
+            np.vstack([c.flatten() for l, c in hori]),
+            [l for l, c in hori])
+
+    def test_analyse_board(self):
+        found_board = self.detector.analyse_board(self.img)
+        found = set([(p['label'], tuple(p['location']))
+                     for p in found_board['parts']])
+        real = set([(p['label'], tuple(p['location']))
+                    for p in self.board['parts']])
+        self.assertEqual(found, real)
 
 
 def visual_test():
