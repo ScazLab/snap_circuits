@@ -32,7 +32,6 @@
 #define MIN_DIST     20
 #define OUT_IMG_H   400
 #define OUT_IMG_W   571
-#define FILT_WINDOW   7
 
 /**
  * This function detects if two lines are close (distance less then MIN_DIST)
@@ -135,7 +134,6 @@ private:
      * @return true/false if success/failure
      */                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
     bool drawLines(cv::Mat img_bw, std::vector<cv::Vec2f> lines);
-
 
     /**
      * @brief Draws a vector of corners into a cv::Mat

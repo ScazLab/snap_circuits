@@ -129,6 +129,20 @@ void BoardCalibrator::callback(const sensor_msgs::ImageConstPtr& msgIn)
             
             // Determine top-left, bottom-left, top-right, and bottom-right corner
             sortCorners(crnrs);
+            updateFilters(crnrs);
+
+            // ROS_INFO("[BoardCalibrator::callback] filtered corners: [%g %g] [%g %g] [%g %g] [%g %g]",
+            //                                                                    crnrs[0].x,crnrs[0].y,
+            //                                                                    crnrs[1].x,crnrs[1].y,
+            //                                                                    crnrs[2].x,crnrs[2].y,
+            //                                                                    crnrs[3].x,crnrs[3].y);
+            // ROS_INFO("[BoardCalibrator::callback] Filters:");
+            // for (int i = 0; i < corners.size(); ++i)
+            // {
+            //     ROS_INFO("[BoardCalibrator::callback] %s",corners[i].toString().c_str());
+            // }
+
+            crnrs = retrieveFilteredCorners();
 
             if (doShow)
             {
@@ -137,9 +151,6 @@ void BoardCalibrator::callback(const sensor_msgs::ImageConstPtr& msgIn)
                 drawCorners(img_bw,crnrs);
                 cv::imshow("img_lines_corners",img_bw);
             }
-
-            updateFilters(crnrs);
-            crnrs = retrieveFilteredCorners();
 
             // Apply the perspective transformation
 
@@ -159,7 +170,7 @@ void BoardCalibrator::callback(const sensor_msgs::ImageConstPtr& msgIn)
             // if (doShow) cv::imshow("image_undistorted",quad);
 
             publishImage(quad,sensor_msgs::image_encodings::BGR8);
-            ROS_DEBUG("Calibrated Board has been published");
+            ROS_DEBUG("[BoardCalibrator::callback] Calibrated Board has been published");
         }
     }
 };
