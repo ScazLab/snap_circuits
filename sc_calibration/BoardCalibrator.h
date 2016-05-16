@@ -148,7 +148,7 @@ private:
      * 
      * @return true/false if success/failure
      */                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
-    bool drawCorners(cv::Mat img_bw, std::vector<cv::Point2f> corners);
+    bool drawCorners(cv::Mat img_bw, std::vector<cv::Point2f> _corners);
 
     /**
      * @brief   Finds corners between a set of lines
@@ -161,6 +161,27 @@ private:
      * @return      A std::vector of cv::Point2f which represent the intersection between the lines
      */
     std::vector<cv::Point2f> findCorners(std::vector<cv::Vec2f> lines, const int &cols, const int &rows);
+
+    /**
+     * @brief   Updates the filters that belong to the board corners
+     * @details This function updates the filter bank that is filtering the corners of the board
+     * according to the new measurement of the board corners. It currently applies a simple bank
+     * of temporal median filters, even though Kalman filters would be the sweet spot in this case.
+     * I might add them if needed (but not in the foreseeable future).
+     * 
+     * @param  _corners The new measurement of the board corners
+     * @return          true/false if success/failure
+     */
+    bool updateFilters(std::vector<cv::Point2f> _corners);
+
+    /**
+     * @brief   Returns the filtered board corners
+     * @details This function pings the filter bank for the latest up-to-date estimation
+     * of the corners' position. It returns the filtered corners.
+     *
+     * @return  The filtered corners
+     */
+    std::vector<cv::Point2f> retrieveFilteredCorners();    
     
 public:
 

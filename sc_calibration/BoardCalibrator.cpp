@@ -36,7 +36,7 @@ BoardCalibrator::BoardCalibrator(string _name) : name(_name), imageTransport(nod
 
     for (int i = 0; i < 4; ++i)
     {
-        corners.push_back(cvPointFilter());
+        corners.push_back(cvPointFilter(FILT_WINDOW));
     }
 
     nodeHandle.param(("/"+name+"/show").c_str(), doShow, true);
@@ -138,6 +138,9 @@ void BoardCalibrator::callback(const sensor_msgs::ImageConstPtr& msgIn)
                 cv::imshow("img_lines_corners",img_bw);
             }
 
+            updateFilters(crnrs);
+            crnrs = retrieveFilteredCorners();
+
             // Apply the perspective transformation
 
             // Corners of the destination image
@@ -159,6 +162,34 @@ void BoardCalibrator::callback(const sensor_msgs::ImageConstPtr& msgIn)
             ROS_DEBUG("Calibrated Board has been published");
         }
     }
+};
+
+bool BoardCalibrator::updateFilters(std::vector<cv::Point2f> _corners)
+{
+    if (_corners.size() != 4)
+    {
+        ROS_ERROR("[BoardCalibrator::updateFilters] The number of corners should be 4.");
+        return false;
+    }
+
+    for (int i = 0; i < corners.size(); ++i)
+    {
+        corners[i].pushPoint2f(_corners[i]);
+    }
+
+    return true;
+};
+
+std::vector<cv::Point2f> BoardCalibrator::retrieveFilteredCorners()
+{
+    std::vector<cv::Point2f> result;
+
+    for (int i = 0; i < corners.size(); ++i)
+    {
+        result.push_back(corners[i].getMedian());
+    }
+
+    return result;
 };
 
 std::vector<cv::Point2f> BoardCalibrator::findCorners(std::vector<cv::Vec2f> lines,
@@ -194,6 +225,7 @@ bool BoardCalibrator::drawLines(cv::Mat img_bw,
         pt1.y = cvRound(y0 + 1000*(a));
         pt2.x = cvRound(x0 - 1000*(-b));
         pt2.y = cvRound(y0 - 1000*(a));
+
         cv::line( img_bw, pt1, pt2, cv::Scalar(0,255,0), 2, CV_AA);
     }
 
