@@ -64,7 +64,7 @@ cvPointFilter &cvPointFilter::operator=(const cvPointFilter &_pf)
 
 bool cvPointFilter::pushPoint2f(const cv::Point2f &_point)
 {
-    return x.pushData(_point.x) && y.pushData(_point.y);
+    return x.pushData(int(_point.x+0.5)) && y.pushData(int(_point.y+0.5));
 };
 
 cv::Point2f cvPointFilter::getMedian()

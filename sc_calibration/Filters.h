@@ -21,7 +21,7 @@
 
 #include <opencv2/core/core.hpp>
 
-#define FILT_WINDOW   7
+#define FILT_WINDOW   9
 
 class MedianFilter
 {
