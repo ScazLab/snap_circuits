@@ -28,11 +28,6 @@
 
 #include "BoardCalibrator.h"
 
-#define MIN_ANGLE     5
-#define MIN_DIST     15
-#define OUT_IMG_H   400
-#define OUT_IMG_W   571
-
 using namespace std;
 
 int main(int argc, char** argv)

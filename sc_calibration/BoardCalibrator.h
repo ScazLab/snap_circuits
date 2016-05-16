@@ -28,8 +28,8 @@
 
 #include "Filters.h"
 
-#define MIN_ANGLE     5
-#define MIN_DIST     15
+#define MIN_ANGLE    10
+#define MIN_DIST     20
 #define OUT_IMG_H   400
 #define OUT_IMG_W   571
 #define FILT_WINDOW   7
@@ -125,18 +125,30 @@ private:
     bool sortCorners(std::vector<cv::Point2f> &_c);
 
     /**
-     * @brief Creates the output picture for debugging purposes
-     * @details This function creates a b/w image with the result of the Canny
-     * filtering on the thresholded input image, plus the lines that should represent
-     * the board, plus their intersections (i.e. the board corners)
+     * @brief Draws a vector of lines into a cv::Mat
+     * @details This function draws a vector of lines into a cv::Mat
+     * It is used for visualization purposes
      * 
      * @param img_bw  the image to draw the graphics on
      * @param lines   the std::vector of cv::Vec2f lines
+     * 
+     * @return true/false if success/failure
+     */                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+    bool drawLines(cv::Mat img_bw, std::vector<cv::Vec2f> lines);
+
+
+    /**
+     * @brief Draws a vector of corners into a cv::Mat
+     * @details This function draws a vector of points into a cv::Mat
+     * (which belong to line intersections, i.e. corners)
+     * It is used for visualization purposes
+     * 
+     * @param img_bw  the image to draw the graphics on
      * @param corners the std::vector of cv::Point2f which represent the intersection between the lines
      * 
      * @return true/false if success/failure
      */                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
-    bool drawCameraLinesCorners(cv::Mat img_bw, std::vector<cv::Vec2f> lines, std::vector<cv::Point2f> corners);
+    bool drawCorners(cv::Mat img_bw, std::vector<cv::Point2f> corners);
 
     /**
      * @brief   Finds corners between a set of lines

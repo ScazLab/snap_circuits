@@ -46,18 +46,18 @@ BoardCalibrator::BoardCalibrator(string _name) : name(_name), imageTransport(nod
     if (doShow)
     {
         ROS_INFO("[BoardCalibrator] Creating windows..");
-        cv::namedWindow("camera_thresholded", CV_WINDOW_AUTOSIZE | CV_GUI_NORMAL);
-        cv::namedWindow("camera_edges", CV_WINDOW_AUTOSIZE | CV_GUI_NORMAL);
-        cv::namedWindow("camera_lines_and_corners", CV_WINDOW_AUTOSIZE | CV_GUI_NORMAL);
+        cv::namedWindow("img_thresholded",   CV_WINDOW_AUTOSIZE | CV_GUI_NORMAL);
+        cv::namedWindow("img_edges",         CV_WINDOW_AUTOSIZE | CV_GUI_NORMAL);
+        cv::namedWindow("img_lines_corners", CV_WINDOW_AUTOSIZE | CV_GUI_NORMAL);
         cv::startWindowThread();
 
-        cv::moveWindow("camera_thresholded",3000,50);
-        cv::moveWindow("camera_edges",3000,600);
-        cv::moveWindow("camera_lines_and_corners",3600,200);
+        cv::moveWindow("img_thresholded",  1900,50);
+        cv::moveWindow("img_edges",        1900,500);
+        cv::moveWindow("img_lines_corners",1900,950);
 
-        cv::resizeWindow("camera_thresholded",857,600);
-        cv::resizeWindow("camera_edges",857,600);
-        cv::resizeWindow("camera_lines_and_corners",857,600);
+        cv::resizeWindow("img_thresholded",  OUT_IMG_W,OUT_IMG_H);
+        cv::resizeWindow("img_edges",        OUT_IMG_W,OUT_IMG_H);
+        cv::resizeWindow("img_lines_corners",OUT_IMG_W,OUT_IMG_H);
     }
 };
 
@@ -89,25 +89,33 @@ void BoardCalibrator::callback(const sensor_msgs::ImageConstPtr& msgIn)
 
     if (doShow)
     {
-        cv::imshow("camera_thresholded",img_board);
+        cv::imshow("img_thresholded",img_board);
         cv::waitKey(5);
     }
 
     // Get the edge map for finding line segments with the Canny method.
     cv::Canny(img_board, img_bw, 30, 30*3, 5);
    
-    if (doShow) cv::imshow("camera_edges",img_bw);
+    if (doShow) cv::imshow("img_edges",img_bw);
 
     // Detect lines with the Hough transform method.
     vector<cv::Vec2f> lines;
     HoughLines(img_bw, lines, 1, CV_PI/180, 100, 0, 0 );
+
+            cv::cvtColor(img_bw,img_bw,CV_GRAY2RGB);
+            drawLines  (img_bw,lines);
 
     if (clusterLines(lines))
     {
         // Find the intersection between the lines
         std::vector<cv::Point2f> crnrs = findCorners(lines, img_res.cols, img_res.rows);
 
-        if (doShow) drawCameraLinesCorners(img_bw,lines,crnrs);
+        if (doShow)
+        {
+
+            drawCorners(img_bw,crnrs);
+            cv::imshow("img_lines_corners",img_bw);
+        }
 
         if (crnrs.size()!=4)
         {
@@ -164,41 +172,36 @@ std::vector<cv::Point2f> BoardCalibrator::findCorners(std::vector<cv::Vec2f> lin
     return res;
 };
 
-bool BoardCalibrator::drawCameraLinesCorners(cv::Mat img_bw, 
-                      std::vector<cv::Vec2f> lines, std::vector<cv::Point2f> _corners)
+bool BoardCalibrator::drawLines(cv::Mat img_bw, 
+                                std::vector<cv::Vec2f> lines)
 {
-        cv::cvtColor(img_bw,img_bw,CV_GRAY2RGB);
+    for( size_t i = 0; i < lines.size(); i++ )
+    {
+        float rho   = lines[i][0];
+        float theta = lines[i][1];
+        cv::Point pt1;
+        cv::Point pt2;
+        double a = cos(theta);
+        double b = sin(theta);
+        double x0 = a*rho;
+        double y0 = b*rho;
+        pt1.x = cvRound(x0 + 1000*(-b));
+        pt1.y = cvRound(y0 + 1000*(a));
+        pt2.x = cvRound(x0 - 1000*(-b));
+        pt2.y = cvRound(y0 - 1000*(a));
+        cv::line( img_bw, pt1, pt2, cv::Scalar(0,255,0), 2, CV_AA);
+    }
 
-        // Draw the lines
-        for( size_t i = 0; i < lines.size(); i++ )
-        {
-            float rho   = lines[i][0];
-            float theta = lines[i][1];
-            cv::Point pt1;
-            cv::Point pt2;
-            double a = cos(theta);
-            double b = sin(theta);
-            double x0 = a*rho;
-            double y0 = b*rho;
-            pt1.x = cvRound(x0 + 1000*(-b));
-            pt1.y = cvRound(y0 + 1000*(a));
-            pt2.x = cvRound(x0 - 1000*(-b));
-            pt2.y = cvRound(y0 - 1000*(a));
-            cv::line( img_bw, pt1, pt2, cv::Scalar(0,255,0), 2, CV_AA);
-        }
+    return true;
+};
 
-        // Draw corners
-        // for (int i = 0; i < _corners.size(); i++)
-        // {
-        //     cv::circle(img_bw, _corners[i], 3, CV_RGB(255,255,255), 2);
-        // }
-
-        cv::circle(img_bw, _corners[0], 3, CV_RGB(  0,255,255), 2);
-        cv::circle(img_bw, _corners[1], 3, CV_RGB(255,  0,255), 2);
-        cv::circle(img_bw, _corners[2], 3, CV_RGB(255,255,  0), 2);
-        cv::circle(img_bw, _corners[3], 3, CV_RGB(255,255,255), 2);
-        
-        cv::imshow("camera_lines_and_corners",img_bw);
+bool BoardCalibrator::drawCorners(cv::Mat img_bw, 
+                                  std::vector<cv::Point2f> _corners)
+{
+    cv::circle(img_bw, _corners[0], 3, CV_RGB(  0,255,255), 2);
+    cv::circle(img_bw, _corners[1], 3, CV_RGB(255,  0,255), 2);
+    cv::circle(img_bw, _corners[2], 3, CV_RGB(255,255,  0), 2);
+    cv::circle(img_bw, _corners[3], 3, CV_RGB(255,255,255), 2);
 
     return true;
 };
@@ -377,8 +380,8 @@ BoardCalibrator::~BoardCalibrator()
     if (doShow)
     {
         ROS_INFO("[BoardCalibrator] Destroying windows..");
-        cv::destroyWindow("camera_lines_and_corners");
-        cv::destroyWindow("camera_thresholded");
-        cv::destroyWindow("camera_edges");
+        cv::destroyWindow("img_lines_corners");
+        cv::destroyWindow("img_thresholded");
+        cv::destroyWindow("img_edges");
     }
 };
