@@ -208,10 +208,10 @@ bool BoardCalibrator::drawCorners(cv::Mat img_bw,
     cv::circle(img_bw, _corners[2], 3, CV_RGB(255,255,  0), 2);  // yellow
     cv::circle(img_bw, _corners[3], 3, CV_RGB(255,255,255), 2);  // white
 
-    cv::putText(img_bw, "0", _corners[0], cv::FONT_HERSHEY_TRIPLEX, 0.8, CV_RGB(  0,255,255));
-    cv::putText(img_bw, "1", _corners[1], cv::FONT_HERSHEY_TRIPLEX, 0.8, CV_RGB(255,  0,255));
-    cv::putText(img_bw, "2", _corners[2], cv::FONT_HERSHEY_TRIPLEX, 0.8, CV_RGB(255,255,  0));
-    cv::putText(img_bw, "3", _corners[3], cv::FONT_HERSHEY_TRIPLEX, 0.8, CV_RGB(255,255,255));
+    // cv::putText(img_bw, "0", _corners[0], cv::FONT_HERSHEY_TRIPLEX, 0.8, CV_RGB(  0,255,255));
+    // cv::putText(img_bw, "1", _corners[1], cv::FONT_HERSHEY_TRIPLEX, 0.8, CV_RGB(255,  0,255));
+    // cv::putText(img_bw, "2", _corners[2], cv::FONT_HERSHEY_TRIPLEX, 0.8, CV_RGB(255,255,  0));
+    // cv::putText(img_bw, "3", _corners[3], cv::FONT_HERSHEY_TRIPLEX, 0.8, CV_RGB(255,255,255));
 
     return true;
 };
