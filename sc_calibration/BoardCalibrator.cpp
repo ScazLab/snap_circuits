@@ -11,16 +11,23 @@ bool isEqual(const cv::Vec2f& _l1, const cv::Vec2f& _l2)
     float rho2   = l2[0];
     float theta2 = l2[1]*180/CV_PI;
 
+    // This accounts for e.g. vertical lines that are parallel but not in the polar space
+    // (e.g. [10 0] with [-10 3.12])
+    if (rho2<0)
+    {
+        rho2=-rho2;
+        theta2=theta1+CV_PI;
+    }
+
     float angle=max(theta1,theta2)-min(theta1,theta2);
     if (angle >= 90)  angle=180-angle;
     float dist=abs(rho1-rho2);
 
-    ROS_DEBUG("[BoardCalibrator::isEqual] l1 is %g %g\tl2 is %g %g\tAngle is %g\tDist is %g YES",
-                                         rho1, theta1, rho2, theta2, angle, dist);
+    // ROS_INFO("[BoardCalibrator::isEqual] l1 is %g %g\tl2 is %g %g\tAngle is %g\tDist is %g %s",
+    //                                      rho1, theta1, rho2, theta2, angle, dist,
+    //                                      (angle > MIN_ANGLE || dist > MIN_DIST)?"NO":"YES");
 
-    if (angle > MIN_ANGLE || dist > MIN_DIST)   { return false; }
-
-    return true;
+    return (angle > MIN_ANGLE || dist > MIN_DIST)?false:true;
 }
 
 BoardCalibrator::BoardCalibrator(string _name) : name(_name), imageTransport(nodeHandle)
