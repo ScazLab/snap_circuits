@@ -23,9 +23,9 @@ bool isEqual(const cv::Vec2f& _l1, const cv::Vec2f& _l2)
     if (angle >= 90)  angle=180-angle;
     float dist=abs(rho1-rho2);
 
-    // ROS_INFO("[BoardCalibrator::isEqual] l1 is %g %g\tl2 is %g %g\tAngle is %g\tDist is %g %s",
-    //                                      rho1, theta1, rho2, theta2, angle, dist,
-    //                                      (angle > MIN_ANGLE || dist > MIN_DIST)?"NO":"YES");
+    ROS_DEBUG("[BoardCalibrator::isEqual] l1 is %g %g\tl2 is %g %g\tAngle is %g\tDist is %g %s",
+                                         rho1, theta1, rho2, theta2, angle, dist,
+                                         (angle > MIN_ANGLE || dist > MIN_DIST)?"NO":"YES");
 
     return (angle > MIN_ANGLE || dist > MIN_DIST)?false:true;
 }
@@ -109,20 +109,10 @@ void BoardCalibrator::callback(const sensor_msgs::ImageConstPtr& msgIn)
     vector<cv::Vec2f> lines;
     HoughLines(img_bw, lines, 1, CV_PI/180, 100, 0, 0 );
 
-            cv::cvtColor(img_bw,img_bw,CV_GRAY2RGB);
-            drawLines  (img_bw,lines);
-
     if (clusterLines(lines))
     {
         // Find the intersection between the lines
         std::vector<cv::Point2f> crnrs = findCorners(lines, img_res.cols, img_res.rows);
-
-        if (doShow)
-        {
-
-            drawCorners(img_bw,crnrs);
-            cv::imshow("img_lines_corners",img_bw);
-        }
 
         if (crnrs.size()!=4)
         {
@@ -139,6 +129,14 @@ void BoardCalibrator::callback(const sensor_msgs::ImageConstPtr& msgIn)
             
             // Determine top-left, bottom-left, top-right, and bottom-right corner
             sortCorners(crnrs);
+
+            if (doShow)
+            {
+                cv::cvtColor(img_bw,img_bw,CV_GRAY2RGB);
+                drawLines  (img_bw,lines);
+                drawCorners(img_bw,crnrs);
+                cv::imshow("img_lines_corners",img_bw);
+            }
 
             // Apply the perspective transformation
 
@@ -164,7 +162,7 @@ void BoardCalibrator::callback(const sensor_msgs::ImageConstPtr& msgIn)
 };
 
 std::vector<cv::Point2f> BoardCalibrator::findCorners(std::vector<cv::Vec2f> lines,
-                                const int &cols, const int &rows)
+                                                      const int &cols, const int &rows)
 {
     std::vector<cv::Point2f> res;
     for (int i = 0; i < lines.size(); i++)
@@ -205,10 +203,15 @@ bool BoardCalibrator::drawLines(cv::Mat img_bw,
 bool BoardCalibrator::drawCorners(cv::Mat img_bw, 
                                   std::vector<cv::Point2f> _corners)
 {
-    cv::circle(img_bw, _corners[0], 3, CV_RGB(  0,255,255), 2);
-    cv::circle(img_bw, _corners[1], 3, CV_RGB(255,  0,255), 2);
-    cv::circle(img_bw, _corners[2], 3, CV_RGB(255,255,  0), 2);
-    cv::circle(img_bw, _corners[3], 3, CV_RGB(255,255,255), 2);
+    cv::circle(img_bw, _corners[0], 3, CV_RGB(  0,255,255), 2);  // cyan
+    cv::circle(img_bw, _corners[1], 3, CV_RGB(255,  0,255), 2);  // magenta
+    cv::circle(img_bw, _corners[2], 3, CV_RGB(255,255,  0), 2);  // yellow
+    cv::circle(img_bw, _corners[3], 3, CV_RGB(255,255,255), 2);  // white
+
+    cv::putText(img_bw, "0", _corners[0], cv::FONT_HERSHEY_TRIPLEX, 0.8, CV_RGB(  0,255,255));
+    cv::putText(img_bw, "1", _corners[1], cv::FONT_HERSHEY_TRIPLEX, 0.8, CV_RGB(255,  0,255));
+    cv::putText(img_bw, "2", _corners[2], cv::FONT_HERSHEY_TRIPLEX, 0.8, CV_RGB(255,255,  0));
+    cv::putText(img_bw, "3", _corners[3], cv::FONT_HERSHEY_TRIPLEX, 0.8, CV_RGB(255,255,255));
 
     return true;
 };
