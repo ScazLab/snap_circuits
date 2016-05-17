@@ -12,10 +12,8 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details
 **/
-#include "StateEstimator.h"
 
-using namespace std;
-using namespace snapCircuits;
+#include "StateEstimator.h"
 
 int main(int argc, char** argv)
 {
