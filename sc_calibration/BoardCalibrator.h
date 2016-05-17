@@ -132,7 +132,7 @@ private:
      * @param lines   the std::vector of cv::Vec2f lines
      * 
      * @return true/false if success/failure
-     */                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+     */
     bool drawLines(cv::Mat img_bw, std::vector<cv::Vec2f> lines);
 
     /**
@@ -145,7 +145,7 @@ private:
      * @param corners the std::vector of cv::Point2f which represent the intersection between the lines
      * 
      * @return true/false if success/failure
-     */                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+     */
     bool drawCorners(cv::Mat img_bw, std::vector<cv::Point2f> _corners);
 
     /**
