@@ -35,6 +35,7 @@ private:
     std::vector<int>                IDs;  // vector of IDs (to recover board state history)
 
     unsigned int cur_id; // the ID to assign to the next part that is going to be added
+                         // (used in case the user removes some parts)
 
     NSVGimage*  svg_image; // the global svg image with the board and the parts
 
@@ -56,10 +57,15 @@ public:
     snapCircuitsBoard &operator=(const snap_circuits::snap_circuits_board &_sb);
 
     /**
-     * isEqual Operator
+     * isEqual Operator. It compares the two boards against their properties 
+     * (i.e. size, parts), AND the order with which the parts have been placed
+     * on the board (i.e. the IDs and cur_id).
+     *
+     * @param  _b  The board to compare to
+     * @return     true/false if success/failure
      */
     bool operator==(const snapCircuitsBoard &_b);
-
+    
     /**
      * Converts the snapCircuitsBoard to the ros msg
      * @return the ros message relative to the snapCircuitsBoard

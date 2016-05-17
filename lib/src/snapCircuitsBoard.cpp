@@ -42,7 +42,8 @@ snapCircuitsBoard & snapCircuitsBoard::operator=(const snapCircuitsBoard &_sb)
     reset();
 
     cur_id = _sb.cur_id;
-    parts  =  _sb.parts;
+    parts  = _sb.parts;
+    IDs    = _sb.IDs;
 
     return *this;
 }
@@ -67,8 +68,8 @@ snapCircuitsBoard & snapCircuitsBoard::operator=(const snap_circuits::snap_circu
 
 bool snapCircuitsBoard::operator==(const snapCircuitsBoard &_b)
 {
-    bool res = n_rows==_b.n_rows && n_cols==_b.n_cols &&
-               cur_id==_b.cur_id &&
+    bool res = n_rows==_b.n_rows &&
+               n_cols==_b.n_cols &&
                parts.size()==_b.parts.size();
 
     if (res==false) return false;
@@ -76,6 +77,7 @@ bool snapCircuitsBoard::operator==(const snapCircuitsBoard &_b)
     for (int i = 0; i < parts.size(); ++i)
     {
         res = res && parts[i]==_b.parts[i];
+        res = res &&   IDs[i]==_b.IDs[i];
     }
     
     return res;

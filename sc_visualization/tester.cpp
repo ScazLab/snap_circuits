@@ -41,6 +41,15 @@ int main(int argc, char** argv)
     board.addPart(snapCircuitsPart("WC",snapLocation(3,3,180)));
     board.print(1);
     board.removePart(10);
+    board.removePart(3);
+
+    snapCircuitsBoard board1;
+    board1=board;
+    printf("board1==board\t%i\n",  board1==board);
+    board1.reset();
+    printf("board1==board\t%i\n",  board1==board);
+    board1.print(1);
+    return 0;
 
     // board.createSVGimage();
 
