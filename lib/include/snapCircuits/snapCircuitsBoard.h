@@ -47,14 +47,14 @@ public:
     /**
     * Standard Copy Operator
     **/
-    snapCircuitsBoard &operator=(const snapCircuitsBoard &_sb);
+    snapCircuitsBoard &operator=(const snapCircuitsBoard &_b);
 
     /**
      * Copy operator overloaded with the corresponding ros message.
      * It populates the snapCircuitsBoard from a ros msg.
-     * @param  _sb the ros message
+     * @param  _b the ros message
      */
-    snapCircuitsBoard &operator=(const snap_circuits::snap_circuits_board &_sb);
+    snapCircuitsBoard &operator=(const snap_circuits::snap_circuits_board &_b);
 
     /**
      * isEqual Operator. It compares the two boards against their properties 

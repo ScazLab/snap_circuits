@@ -36,32 +36,32 @@ bool snapCircuitsBoard::reset()
     return true;
 }
 
-snapCircuitsBoard & snapCircuitsBoard::operator=(const snapCircuitsBoard &_sb)
+snapCircuitsBoard & snapCircuitsBoard::operator=(const snapCircuitsBoard &_b)
 {
-    set_n_rows_and_cols(_sb.n_rows,_sb.n_cols);
+    set_n_rows_and_cols(_b.n_rows,_b.n_cols);
     reset();
 
-    cur_id = _sb.cur_id;
-    parts  = _sb.parts;
-    IDs    = _sb.IDs;
+    cur_id = _b.cur_id;
+    parts  = _b.parts;
+    IDs    = _b.IDs;
 
     return *this;
 }
 
-snapCircuitsBoard & snapCircuitsBoard::operator=(const snap_circuits::snap_circuits_board &_sb)
+snapCircuitsBoard & snapCircuitsBoard::operator=(const snap_circuits::snap_circuits_board &_b)
 {
-    set_n_rows_and_cols(_sb.n_rows,_sb.n_cols);
+    set_n_rows_and_cols(_b.n_rows,_b.n_cols);
     reset();
 
     // The first element, the board, is not going to be added twice
-    for (int i = 1; i < _sb.parts.size(); ++i)
+    for (int i = 1; i < _b.parts.size(); ++i)
     {
-        snap_circuits::snap_circuits_part sp = _sb.parts[i];
+        snap_circuits::snap_circuits_part sp = _b.parts[i];
         addPart(snapCircuitsPart(sp,n_rows,n_cols));
-        IDs[i]=_sb.IDs[i];
+        IDs[i]=_b.IDs[i];
     }
 
-    cur_id = _sb.cur_id;
+    cur_id = _b.cur_id;
 
     return *this;
 }
