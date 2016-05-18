@@ -67,6 +67,8 @@ private:
     
     ros::Publisher boardStatePublisher;
 
+    std::vector<cv::Point> pegs;
+
     snapCircuits::snapCircuitsBoard board;
 
     cv::RNG rng;
@@ -78,7 +80,15 @@ private:
      * @param  img  [description]
      * @return      [description]
      */
-    bool drawPegs(const vector<cv::Point> &pegs, cv::Mat &img);
+    bool drawPegs(const std::vector<cv::Point> &pegs, cv::Mat &img);
+
+    /**
+     * [drawHulls description]
+     * @param  hulls [description]
+     * @param  img   [description]
+     * @return       [description]
+     */
+    bool drawHulls(const std::vector<std::vector<cv::Point> > &hulls, cv::Mat &img);
 
     /**
      * [filterByColor description]
@@ -88,7 +98,7 @@ private:
     cv::Mat filterByColor(const cv::Mat &in);
 
     /**
-     * 
+     * Find the parts and their convex hulls
      */
     std::vector<std::vector<cv::Point> > findPartsHull(const cv::Mat &in, cv::Mat &out);
 

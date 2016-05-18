@@ -13,8 +13,8 @@
  * Public License for more details
 **/
 
-#define NANOSVG_IMPLEMENTATION      // Expands implementation
-#define NANOSVGRAST_IMPLEMENTATION  // Expands implementation
+#define NANOSVG_IMPLEMENTATION      // Expands nanosvg implementation
+#define NANOSVGRAST_IMPLEMENTATION  // Expands nanosvg implementation
 
 #include "StateEstimator.h"
 
@@ -32,6 +32,17 @@ StateEstimator::StateEstimator(string _name) : rng(ros::Time::now().toSec()), bo
     imageSubscriber      = imageTransport.subscribe(sub.c_str(),1,&StateEstimator::callback, this);
     imagePublisher       = imageTransport.advertise(pubIm,1);
     boardStatePublisher  = nodeHandle.advertise<snap_circuits::snap_circuits_board>(pubSt,1);
+
+    // Build an array of pegs for later use    
+    for (int i = 0; i < snapCircuits::N_ROWS; ++i)
+    {
+        for (int j = 0; j < snapCircuits::N_COLS; ++j)
+        {
+            int x = X_OFFS+i*X_STEP;
+            int y = Y_OFFS+j*Y_STEP;
+            pegs.push_back(cv::Point2f(x,y));
+        }
+    }
 
     ROS_INFO("[StateEstimator] Name       set   to %s", name.c_str());
     ROS_INFO("[StateEstimator] Show param set   to %i", doShow);
@@ -71,24 +82,11 @@ void StateEstimator::callback(const sensor_msgs::ImageConstPtr& msgIn)
     cv::Mat img_bw;
     cv::cvtColor(img_in,img_bw,CV_BGR2GRAY);
 
-    // Build an array of pegs for later use
-    std::vector<cv::Point> pegs;
-    
-    for (int i = 0; i < snapCircuits::N_ROWS; ++i)
-    {
-        for (int j = 0; j < snapCircuits::N_COLS; ++j)
-        {
-            int x = X_OFFS+i*X_STEP;
-            int y = Y_OFFS+j*Y_STEP;
-            pegs.push_back(cv::Point2f(x,y));
-        }
-    }
-
     // Filter the image in order to detect the colors
     img_bw = filterByColor(img_in);
 
     // Find the parts and their convex hulls
-    vector<vector<cv::Point> > hull = findPartsHull(img_bw,img_out);
+    vector<vector<cv::Point> > hulls = findPartsHull(img_bw,img_out);
 
     // Detect some information on the parts based on their hulls
     std::vector<part> parts = detectParts(hull,pegs);
@@ -103,19 +101,14 @@ void StateEstimator::callback(const sensor_msgs::ImageConstPtr& msgIn)
         boardStatePublisher.publish(board.toMsg());
     }
 
-    drawPegs(pegs,img_out);
-
-    for (int i = 0; i < hull.size(); ++i)
-    {
-        cv::Rect rect = cv::boundingRect(hull[i]);
-        cv::rectangle(img_out,rect,cv::Scalar(0,0,255),2);
-    }
-
     if (doShow)
     {
+        drawPegs (pegs, img_out);
+        drawHulls(hulls,img_out);
+        
         // Show the image
         cv::imshow("output", img_out);
-        cv::waitKey(5);                  // Wait for a keystroke in the window
+        cv::waitKey(5);
     }
 
     publishImage(img_out,sensor_msgs::image_encodings::BGR8);
@@ -123,13 +116,24 @@ void StateEstimator::callback(const sensor_msgs::ImageConstPtr& msgIn)
     return;
 };
 
+bool StateEstimator::drawHulls(const vector<vector<cv::Point> > &hulls, cv::Mat &img)
+{
+    for (int i = 0; i < hulls.size(); ++i)
+    {
+        cv::Rect rect = cv::boundingRect(hulls[i]);
+        cv::rectangle(img,rect,cv::Scalar(0,0,255),2);
+    }
+
+    return true;
+}
+
 bool StateEstimator::drawPegs(const vector<cv::Point> &pegs, cv::Mat &img)
 {
     for (int i = 0; i < pegs.size(); ++i)
     {
         cv::circle(img, pegs[i], 3, CV_RGB(255,255,255), 1);
     }
-    
+
     return true;
 }
 
