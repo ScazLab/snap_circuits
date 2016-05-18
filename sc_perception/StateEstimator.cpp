@@ -21,7 +21,7 @@
 using namespace std;
 using namespace snapCircuits;
 
-StateEstimator::StateEstimator(string _name) : rng(ros::Time::now().toSec()),
+StateEstimator::StateEstimator(string _name) : rng(ros::Time::now().toSec()), board(),
                                                name(_name), imageTransport(nodeHandle)
 {
     nodeHandle.param(("/"+name+"/show").c_str(), doShow, true);
@@ -103,11 +103,7 @@ void StateEstimator::callback(const sensor_msgs::ImageConstPtr& msgIn)
         boardStatePublisher.publish(board.toMsg());
     }
 
-    // Draw the pegs
-    for (int i = 0; i < pegs.size(); ++i)
-    {
-        cv::circle(img_out, pegs[i], 3, CV_RGB(255,255,255), 1);
-    }
+    drawPegs(pegs,img_out);
 
     for (int i = 0; i < hull.size(); ++i)
     {
@@ -126,6 +122,16 @@ void StateEstimator::callback(const sensor_msgs::ImageConstPtr& msgIn)
 
     return;
 };
+
+bool StateEstimator::drawPegs(const vector<cv::Point> &pegs, cv::Mat &img)
+{
+    for (int i = 0; i < pegs.size(); ++i)
+    {
+        cv::circle(img, pegs[i], 3, CV_RGB(255,255,255), 1);
+    }
+    
+    return true;
+}
 
 cv::Mat StateEstimator::filterByColor(const cv::Mat &in)
 {

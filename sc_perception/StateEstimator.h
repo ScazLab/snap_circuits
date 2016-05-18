@@ -57,6 +57,8 @@ private:
     std::string  pubIm;
     std::string  pubSt;
 
+    bool doShow;
+
     ros::NodeHandle nodeHandle;
 
     image_transport::ImageTransport imageTransport;
@@ -65,19 +67,49 @@ private:
     
     ros::Publisher boardStatePublisher;
 
+    snapCircuits::snapCircuitsBoard board;
+
     cv::RNG rng;
     cv::Mat img_in;
 
-    bool doShow;
+    /**
+     * [drawPegs description]
+     * @param  pegs [description]
+     * @param  img  [description]
+     * @return      [description]
+     */
+    bool drawPegs(const vector<cv::Point> &pegs, cv::Mat &img);
 
+    /**
+     * [filterByColor description]
+     * @param  in [description]
+     * @return    [description]
+     */
     cv::Mat filterByColor(const cv::Mat &in);
 
+    /**
+     * 
+     */
     std::vector<std::vector<cv::Point> > findPartsHull(const cv::Mat &in, cv::Mat &out);
 
+    /**
+     * 
+     */
     std::vector< part > detectParts(const std::vector< std::vector<cv::Point> > &hull, const std::vector<cv::Point> &pegs);
 
+    /**
+     * [createBoard description]
+     * @param  _b [description]
+     * @param  _p [description]
+     * @return    [description]
+     */
     bool createBoard(snapCircuits::snapCircuitsBoard &_b, const std::vector<part> &_p);
 
+    /**
+     * [detectPartColor description]
+     * @param  _p [description]
+     * @return    [description]
+     */
     std::string detectPartColor(part _p);
 
     /**
