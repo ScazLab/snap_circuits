@@ -16,7 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
              image_transport
              cv_bridge)
 
-find_package( OpenCV REQUIRED )
+find_package( OpenCV 2.4 REQUIRED )
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)

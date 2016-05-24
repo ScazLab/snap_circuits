@@ -89,7 +89,7 @@ void StateEstimator::callback(const sensor_msgs::ImageConstPtr& msgIn)
     vector<vector<cv::Point> > hulls = findPartsHull(img_bw,img_out);
 
     // Detect some information on the parts based on their hulls
-    std::vector<part> parts = detectParts(hull,pegs);
+    std::vector<part> parts = detectParts(hulls,pegs);
 
     // Create the board to be published
     snapCircuitsBoard board;
