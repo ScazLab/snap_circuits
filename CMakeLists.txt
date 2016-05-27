@@ -166,6 +166,7 @@ target_link_libraries(dummy_image_publisher                  ${OpenCV_LIBS} ${ca
 ## in contrast to setup.py, you can choose the destination
 install(PROGRAMS
   bin/train_classifier
+  bin/classification_node
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
