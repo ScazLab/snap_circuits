@@ -225,6 +225,8 @@ class PartDetector:
                   part_reference_from_tag_location(label, loc, orientation),
                   orientation)
                  for (label, loc, orientation) in found
+                 if label not in [None, 'None']
+                 # Apparently None is converted to string on classifier saving
                  ]
         return {'parts': [
             {'id': i, 'label': label,
