@@ -1,0 +1,12 @@
+#!/usr/bin/env python
+
+from board_perception.part_classifier import (
+        save_training_data, check_training_data, train_classifier,
+        evaluate_classifier)
+
+
+if __name__ == "__main__":
+    if not check_training_data():
+        save_training_data()
+    train_classifier()
+    evaluate_classifier()
